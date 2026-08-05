@@ -72,7 +72,9 @@ project name, and the diff range covering this phase's work.
 
 The verifier returns one line per finding, `[FIX]` or `[ESCALATE]`, or
 returns exactly `CLEAN`. Fix every `[FIX]` finding before moving on —
-send it back to an implementer subagent, or fix it directly if trivial —
+send it back to a fresh implementer subagent, the same as any other
+task; the thin-orchestrator rule holds here too, so the talpirun session
+never fixes a finding inline itself, no matter how trivial it looks —
 then re-run the phase's contract tests. Carry every `[ESCALATE]` finding
 forward into the phase report; do not resolve it yourself.
 
@@ -99,10 +101,15 @@ list, this phase does not get a normal, continue-on report. Instead:
    question the human must rule on: ratify the change, or reject it.
 
 On ratify: update the Reversibility Ledger and spec.md to reflect the
-new decision, then resume the run. On reject: revert the decision in
-the code, dispatch a fresh-session verifier to re-check the revert, and
-only then resume. Every stop-report — halted or not — includes the
-one-line resume command, so the human, or the next session, knows
+new decision, then resume — set `.talpi/state.md`'s `run_status` back to
+`building` and journal that the run resumed after ratifying the
+decision. On reject: revert the decision in the code, dispatch a
+fresh-session verifier to re-check the revert, and only then resume the
+same way — `run_status` back to `building` in `.talpi/state.md`, and a
+journal entry noting the run resumed after reverting the decision. In
+both cases, `state.md` must never be left reading `halted` once the run
+is actually moving again. Every stop-report — halted or not — includes
+the one-line resume command, so the human, or the next session, knows
 exactly how to continue.
 
 All other escalations are non-blocking: list them in the phase report
