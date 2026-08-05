@@ -35,3 +35,9 @@ status: draft
 ### Delegated (agent's discretion)
 <!-- Easy-to-change areas explicitly named and handed to the agent; they
      stay out of the rest of the spec. -->
+
+## Conventions
+<!-- Raw answers from the Conventions lens: design tokens/theme, shared-
+     utility policy, naming/layout rules, and user-visible failure
+     behavior. This is the seed talpiplan reads when drafting
+     `.talpi/conventions.md`. -->

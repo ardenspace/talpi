@@ -125,6 +125,9 @@ The spec contains, at minimum:
   CLI behavior)
 - **Reversibility ledger** — hard-to-change decisions *decided*; easy-to-
   change areas *delegated* (listed by name so delegation is explicit)
+- **Conventions notes** — raw answers from the Conventions lens (design
+  tokens/theme, shared-utility policy, naming/layout rules, user-visible
+  failure behavior); the seed for `.talpi/conventions.md`
 
 ### 3.3 Plan stage
 

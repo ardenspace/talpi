@@ -50,19 +50,15 @@ fix any mismatch before presenting the plan to the human.
 ## Conventions Draft
 
 Write `.talpi/conventions.md` from `references/conventions-template.md`.
-Seed it from the spec's Conventions Lens answers — the questions about
-a design theme, shared-utility policy, naming/layout rules, and
-user-visible failure behavior that were asked during the spec
-interview. Note that `.talpi/spec.md` itself does not persist a
-Conventions section — those answers live in the conversation, not in
-the artifact. If this session carries that conversation's context, use
-it directly. If it does not (a fresh session with only the spec file on
-disk), fold in whatever related signal spec.md does carry (Simplicity
-Zones, Product Picture, relevant Requirements) and ask the human
-directly for anything still missing before drafting: is there a design
-theme; what kinds of logic always get extracted into shared utilities;
-any naming or layout rules; what a user should see when something
-fails.
+Seed it from the spec's `## Conventions` section — the recorded answers
+to the design-theme, shared-utility policy, naming/layout rules, and
+user-visible failure behavior questions asked during the spec
+interview. That section is the primary source, and survives on its own
+even in a fresh session with only the spec file on disk. If this
+session also carries the live conversation that produced those answers,
+use it to enrich the draft with detail the recorded answers didn't
+capture. Ask the human only for genuine gaps — anything the spec's
+Conventions section leaves unanswered.
 
 Present the conventions draft to the human together with the plan —
 never separately. Approving the plan without knowing the conventions it

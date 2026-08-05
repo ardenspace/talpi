@@ -23,6 +23,7 @@ Sections follow this structure:
 - `## Reversibility Ledger` — split into two subsections:
   - `### Decided (hard to change)` — technical or architectural decisions that will be costly to reverse
   - `### Delegated (agent's discretion)` — choices explicitly delegated to the implementing agent to make
+- `## Conventions` — raw answers from the Conventions interview lens (design tokens/theme, shared-utility policy, naming/layout rules, user-visible failure behavior); the seed `talpiplan` reads when drafting `.talpi/conventions.md`
 
 ---
 

@@ -24,8 +24,8 @@ If `.talpi/state.md` reads `run_status: halted`, do not build — hand
 off to the talpiresume skill so the human can rule on the halt first.
 
 Read `.talpi/state.md` for `current_phase` and `phases_total` and work
-the plan one phase at a time starting there. If `current_phase` is
-already past `phases_total`, the run should already be `done`; check
+the plan one phase at a time starting there. If `current_phase` is at
+or past `phases_total`, the run should already be `done`; check
 `.talpi/journal.md` for what happened instead of re-running a phase.
 If the journal's tail is `run done`, the run is genuinely finished —
 report that. If the tail is `final report sent, awaiting acceptance`

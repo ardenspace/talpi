@@ -91,7 +91,9 @@ unresolved.
 Write `.talpi/spec.md` following `references/spec-template.md` exactly —
 same section names, same order, `status: draft` as the first line. Fill
 in every section from the Act 1 and Act 2 conversation; do not leave
-template hint comments in the final file.
+template hint comments in the final file. This includes the Conventions
+lens's answers, recorded verbatim in the spec's `## Conventions`
+section — so a session death after approval loses nothing.
 
 The first time this draft is written, also initialize `.talpi/state.md`
 if it does not already exist, with all four keys `docs/state-format.md`
