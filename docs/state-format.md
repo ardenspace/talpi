@@ -1,0 +1,151 @@
+# .talpi/ State Format
+
+All cross-session state lives in `.talpi/` at the target project root. This directory serves as the canonical store for project state, designed with one core assumption: any session can terminate at any moment. The files described here are the single source of truth for the state of a talpi run. All files are Markdown, human-readable, and should be committed to version control so their evolution is tracked.
+
+Skills and agents must never invent new state files or namespaces outside of `.talpi/`. Every reference to `.talpi/*` from a skill must be to a file defined in this document.
+
+---
+
+## .talpi/spec.md
+
+Produced by the `talpispec` skill. This file captures the product specification for the current run.
+
+The first line is a status marker, exactly as written: `status: draft` or `status: approved`. This allows quick status lookup without parsing Markdown.
+
+Sections follow this structure:
+
+- `# Spec: <project>` — the document title
+- `## Product Picture` — describes the target user, their core experience with the feature, and a smoke-test scenario that proves the feature works
+- `## Requirements` — enumerated requirements, each independently verifiable
+- `## Out of Scope (v1)` — explicit non-goals for this phase to prevent scope creep
+- `## Simplicity Zones` — areas where the design deliberately trades capability for maintainability or understandability
+- `## Boundary Contracts` — one `### B<n>: <name>` subsection per contract, each written testably so acceptance is unambiguous
+- `## Reversibility Ledger` — split into two subsections:
+  - `### Decided (hard to change)` — technical or architectural decisions that will be costly to reverse
+  - `### Delegated (agent's discretion)` — choices explicitly delegated to the implementing agent to make
+
+---
+
+## .talpi/plan.md
+
+Produced by the `talpiplan` skill. This file breaks the specification down into executable phases.
+
+The first line is a status marker: `status: draft` or `status: approved`.
+
+Sections:
+
+- `# Plan: <project>` — the document title
+- One `## Phase <n>: <name>` section per phase, each containing:
+  - A goal line (one sentence summarizing what that phase achieves)
+  - A `Contracts:` line listing which boundary contracts from spec.md this phase pins (e.g., `Contracts: B1, B3`)
+  - Task checkboxes in Markdown format (`- [ ] <task description>`)
+
+The plan is the source of truth for phase numbering and sequencing.
+
+---
+
+## .talpi/conventions.md
+
+Drafted by the `talpiplan` skill and maintained by the `talpirun` skill as a living document. This file captures shared patterns and utilities that implementers should know about before writing code.
+
+Sections:
+
+- `# Conventions` — the document title
+- `## Design Tokens` — colors, typography, spacing, and other visual constants used across the project
+- `## Shared Utilities` — functions, components, or modules that are available for reuse; implementers register new utilities here as they create them
+- `## Layout & Naming` — file organization, naming conventions, and module structure
+- `## Failure Behavior` — how errors should be handled, logged, and reported; what constitutes a fatal vs. recoverable failure
+
+---
+
+## .talpi/state.md
+
+A machine-readable-ish snapshot file, overwritten (not appended) at each run state transition. This file is meant to be quickly parseable by both scripts and humans.
+
+Exactly these keys appear, one per line:
+
+- `run_status: speccing | planning | building | done | halted` — the current phase of the run
+  - `speccing` — the spec is being written or refined
+  - `planning` — the spec is approved; the plan is being written or refined
+  - `building` — the plan is approved; implementation is underway
+  - `done` — all phases complete; the run has concluded successfully
+  - `halted` — the run stopped before completion (check journal.md for why)
+- `current_phase: <n>` — the current phase number (0 before any build phase starts)
+- `phases_total: <n>` — total number of phases in the plan
+- `updated: <ISO date>` — timestamp of the last update to this file
+
+Example:
+```
+run_status: building
+current_phase: 2
+phases_total: 4
+updated: 2026-08-05T14:32:00Z
+```
+
+---
+
+## .talpi/journal.md
+
+An append-only event log. Never rewritten or compacted; entries stack chronologically.
+
+Format: `- [<ISO date>] <event>` — one event per line.
+
+When a run halts, a journal line is written to explain why: `run halted: <reason>`. This line always accompanies a state.md transition to `run_status: halted`.
+
+Example events:
+```markdown
+- [2026-08-05T10:00:00Z] run started: speccing
+- [2026-08-05T11:15:00Z] spec approved
+- [2026-08-05T11:30:00Z] run started: planning
+- [2026-08-05T14:00:00Z] plan approved, 4 phases
+- [2026-08-05T14:05:00Z] run started: building
+- [2026-08-05T14:32:00Z] phase 1 complete
+- [2026-08-05T16:45:00Z] run halted: context limit exceeded; see handoff.md for continuation notes
+```
+
+On conflicting entries (same timestamp or event), the latest line wins, and only that version is authoritative.
+
+---
+
+## .talpi/handoff.md
+
+Overwritten at every phase boundary and whenever context becomes constrained. This file is the "resume point" for a fresh session.
+
+A session reading `handoff.md` + `state.md` + `conventions.md` (without any prior conversation history) must have enough information to pick up the work where it was left off and continue productively.
+
+Sections:
+
+- `## Done so far` — summary of completed work, phase by phase or by category
+- `## Next step` — concrete, unambiguous next action (e.g., "Implement the user-auth module per Phase 2, task 3")
+- `## Gotchas` — known pitfalls, dependency issues, edge cases, or open questions that may trip up the next session
+
+Example:
+```markdown
+## Done so far
+
+Phase 1 (Setup) is complete. Database schema is defined and migrations run. Frontend scaffolding set up.
+
+## Next step
+
+Implement the user-auth controller in Phase 2. Start with the login endpoint as described in plan.md Phase 2, task 2.
+
+## Gotchas
+
+- The database migrations assume PostgreSQL 13+; SQLite is not supported.
+- The frontend build step has a 5-minute cold-start time on first run; expect delays.
+- Context limit is tightening; next session may need to split Phase 2 into sub-phases.
+```
+
+---
+
+## Running State Lifecycle
+
+A typical talpi run progresses:
+
+1. **speccing** — `talpispec` writes spec.md, spec.md is reviewed
+2. **planning** — `talpiplan` writes plan.md from the approved spec, plan.md is reviewed
+3. **building** — `talpirun` executes phases, updating state.md and journal.md at phase boundaries
+4. **done** — all phases complete; run concludes with run_status: done
+5. **halted** — if context, time, or resources run out, the run transitions to halted with a journal explanation
+
+At any transition, handoff.md is written to ensure the next session can resume without conversation history.
