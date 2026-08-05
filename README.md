@@ -30,7 +30,7 @@ Full rationale and design record:
            Act 2: design interview (convergent, 4 lenses)
            Spec review panel (3 fresh-session reviewers)
            → HUMAN APPROVAL (required)
-2. PLAN    Phase decomposition + CONVENTIONS.md draft
+2. PLAN    Phase decomposition + conventions.md draft
            → HUMAN APPROVAL (required — last mandatory human gate)
 3. BUILD   Autonomous. Per phase: pin boundary contracts as tests first,
            then implement freely inside them. No per-task verification.
@@ -84,12 +84,13 @@ Full field-by-field format: [`docs/state-format.md`](docs/state-format.md).
 ## Install
 
 ```
-claude plugin marketplace add ardenspace/talpi
-claude plugin install talpi@talpi
+/plugin marketplace add ardenspace/talpi
+/plugin install talpi@talpi
 ```
 
-Restart Claude Code to load the plugin. Then, in your project, invoke
-the `talpispec` skill to start the pipeline.
+Run these inside Claude Code. Restart Claude Code to load the plugin.
+Then, in your project, invoke the `talpispec` skill to start the
+pipeline.
 
 ## Status
 

@@ -69,7 +69,10 @@ Exactly these keys appear, one per line:
   - `planning` — the spec is approved; the plan is being written or refined
   - `building` — the plan is approved; implementation is underway
   - `done` — all phases complete; the run has concluded successfully
-  - `halted` — the run stopped before completion (check journal.md for why)
+  - `halted` — the run stopped for a human ruling: a phase-end verifier
+    found something that alters an entry on the spec's Reversibility
+    Ledger **Decided** list. The reason lives in journal.md's
+    `run halted: <reason>` line, not here.
 - `current_phase: <n>` — the current phase number (0 before any build phase starts)
 - `phases_total: <n>` — total number of phases in the plan
 - `updated: <ISO date>` — timestamp of the last update to this file
@@ -92,7 +95,7 @@ Format: `- [<ISO date>] <event>` — one event per line.
 
 When a run halts, a journal line is written to explain why: `run halted: <reason>`. This line always accompanies a state.md transition to `run_status: halted`.
 
-Example events:
+Example events (illustrative, not exhaustive):
 ```markdown
 - [2026-08-05T10:00:00Z] run started: speccing
 - [2026-08-05T11:15:00Z] spec approved
@@ -100,7 +103,7 @@ Example events:
 - [2026-08-05T14:00:00Z] plan approved, 4 phases
 - [2026-08-05T14:05:00Z] run started: building
 - [2026-08-05T14:32:00Z] phase 1 complete
-- [2026-08-05T16:45:00Z] run halted: context limit exceeded; see handoff.md for continuation notes
+- [2026-08-05T16:45:00Z] run halted: verifier found auth model changed from spec
 ```
 
 On conflicting entries (same timestamp or event), the latest line wins, and only that version is authoritative.
@@ -146,6 +149,6 @@ A typical talpi run progresses:
 2. **planning** — `talpiplan` writes plan.md from the approved spec, plan.md is reviewed
 3. **building** — `talpirun` executes phases, updating state.md and journal.md at phase boundaries
 4. **done** — all phases complete; run concludes with run_status: done
-5. **halted** — if context, time, or resources run out, the run transitions to halted with a journal explanation
+5. **halted** — if a phase-end verifier finding alters a Reversibility Ledger **Decided** entry, the run transitions to halted for a human ruling, with a journal explanation (context, time, or resource limits never halt a run — those are self-served via auto-compact and the session-start hook)
 
 At any transition, handoff.md is written to ensure the next session can resume without conversation history.

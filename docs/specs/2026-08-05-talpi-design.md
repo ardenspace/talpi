@@ -50,7 +50,7 @@ the synthesis of lessons from two predecessor plugins built by the author:
            Act 2: design interview (convergent, 4 lenses)
            Spec review panel (3 fresh-session reviewers)
            → HUMAN APPROVAL (required)
-2. PLAN    Phase decomposition + CONVENTIONS.md draft
+2. PLAN    Phase decomposition + conventions.md draft
            → HUMAN APPROVAL (required — last mandatory human gate)
 3. BUILD   Autonomous. Per phase: pin boundary contracts as tests first,
            then implement freely inside them. No per-task verification.
@@ -152,7 +152,7 @@ autonomously until final acceptance.
   (anything a user of the product would notice; anything touching a
   boundary or the reversibility ledger) go to the human — via chat,
   non-blocking where possible.
-- **CONVENTIONS.md is a living document.** New shared utilities get
+- **`.talpi/conventions.md` is a living document.** New shared utilities get
   registered in it; each phase's implementer reads it first and reuses.
   It doubles as cross-session continuity: a fresh session inherits the
   conventions by reading one file.
@@ -200,7 +200,8 @@ guarded by contracts, and internals were designed to be cheap to change.
 
 - **State lives on disk, in Markdown, and is the single source of truth.**
   Design assumption: *any session can die at any moment.* State directory:
-  `.talpi/` in the target project (spec, plan, state, journal, handoff).
+  `.talpi/` in the target project (spec, plan, conventions, state,
+  journal, handoff).
 - **Context is self-served; only restarts involve the human.** A live
   session never runs out of road: the harness auto-compacts, and a
   session-start hook re-routes a compacted or fresh session back into the
