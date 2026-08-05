@@ -75,8 +75,8 @@ hook resumes it from the right point.
 ## State
 
 All cross-session state lives in `.talpi/` at the project root — spec,
-plan, conventions, state, and journal, all plain Markdown, all meant to
-be committed to version control. The design assumption behind this is
+plan, conventions, state, journal, and handoff, all plain Markdown, all
+meant to be committed to version control. The design assumption behind this is
 that any session can die at any moment, so the files on disk — not the
 conversation — are the single source of truth for where a run stands.
 Full field-by-field format: [`docs/state-format.md`](docs/state-format.md).
