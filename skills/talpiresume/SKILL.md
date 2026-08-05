@@ -26,9 +26,16 @@ resume-after-reject). If they disagree, the journal wins — rewrite
 ## Fallback: no readable state.md
 
 If `.talpi/` exists but `state.md` is missing, or its `run_status` line
-can't be read, do not guess blindly — infer from what's actually on
-disk, then rewrite `state.md` in full (all four keys) before routing:
+can't be read, do not guess blindly — check the journal first, then
+rewrite `state.md` in full (all four keys) before routing:
 
+- Check the tail of `.talpi/journal.md` for the most recent relevant
+  entry first. If it is `run done`, infer `done`. If it is `run
+  halted: <reason>` with no later entry noting the run resumed, infer
+  `halted`. Either way, reconstruct `current_phase` and `phases_total`
+  from plan.md and the journal per the Conflict Rule above, then route
+  accordingly. Otherwise, fall through to inferring from
+  spec.md/plan.md below.
 - No `.talpi/spec.md`, or it exists with `status: draft` — infer
   `speccing`.
 - `.talpi/spec.md` has `status: approved` but there is no

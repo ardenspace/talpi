@@ -28,10 +28,14 @@ the plan one phase at a time starting there. If `current_phase` is
 already past `phases_total`, the run should already be `done`; check
 `.talpi/journal.md` for what happened instead of re-running a phase.
 If the journal's tail is `run done`, the run is genuinely finished —
-report that. If instead the tail is `final report sent, awaiting
-acceptance` with no later `run done` line, completion already ran and
-is waiting on the human — remind them the final report is pending
-their acceptance and wait; do not rebuild or re-send the report.
+report that. If the tail is `final report sent, awaiting acceptance`
+with nothing later, completion already ran and is waiting on the
+human — remind them the final report is pending their acceptance and
+wait; do not rebuild or re-send the report. If instead the tail is
+`acceptance declined: <summary>`, or shows fix-loop events after the
+awaiting-acceptance line, the human already responded and the
+reopened fix work is in progress — continue the phase loop rather
+than waiting.
 
 ## Phase loop
 
@@ -164,10 +168,13 @@ verification is clean or resolved:
 `updated: <ISO date>`. Journal `run done`.
 
 **On rejection:** treat it like a broken smoke run — this is not an
-escalation, it reopens the phase loop. Turn the human's feedback into
-one or more tasks, dispatch fresh implementer subagents the same as
-any other task, re-run the affected contract tests, then repeat
-Completion (smoke run through asking for acceptance again) from step 1.
+escalation, it reopens the phase loop. Journal `acceptance declined:
+<summary>` first, so the journal tail reflects what happened; the
+reopened work then journals its own phase events the normal way. Turn
+the human's feedback into one or more tasks, dispatch fresh implementer
+subagents the same as any other task, re-run the affected contract
+tests, then repeat Completion (smoke run through asking for acceptance
+again) from step 1.
 
 Nothing about completion is heavyweight: the boundaries were already
 guarded by contracts through every phase, and internals were built to
