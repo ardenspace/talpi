@@ -1,0 +1,21 @@
+{
+  "name": "talpi",
+  "description": "Molting-driven development pipeline: harden the boundaries with human-designed contracts, let the interior grow fast and free. Spec through conversation, build autonomously, verify only where change is expensive.",
+  "version": "0.1.0",
+  "author": {
+    "name": "ardenspace",
+    "email": "ardensdevspace@gmail.com"
+  },
+  "homepage": "https://github.com/ardenspace/talpi",
+  "repository": "https://github.com/ardenspace/talpi",
+  "license": "MIT",
+  "keywords": [
+    "mvp",
+    "boundaries",
+    "contract-testing",
+    "reversibility",
+    "workflow",
+    "pipeline",
+    "autonomous"
+  ]
+}

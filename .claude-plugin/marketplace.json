@@ -1,0 +1,14 @@
+{
+  "name": "talpi",
+  "description": "Molting-driven development pipeline: thick boundaries, thin internals, fast solid MVPs.",
+  "owner": {
+    "name": "ardenspace"
+  },
+  "plugins": [
+    {
+      "name": "talpi",
+      "source": "./",
+      "description": "Molting-driven development pipeline: harden the boundaries with human-designed contracts, let the interior grow fast and free."
+    }
+  ]
+}
