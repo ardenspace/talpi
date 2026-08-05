@@ -23,6 +23,21 @@ reflect (a phase advance, a halt, a resume-after-ratify or
 resume-after-reject). If they disagree, the journal wins — rewrite
 `state.md` to match it, then route off the corrected value.
 
+## Fallback: no readable state.md
+
+If `.talpi/` exists but `state.md` is missing, or its `run_status` line
+can't be read, do not guess blindly — infer from what's actually on
+disk, then rewrite `state.md` in full (all four keys) before routing:
+
+- No `.talpi/spec.md`, or it exists with `status: draft` — infer
+  `speccing`.
+- `.talpi/spec.md` has `status: approved` but there is no
+  `.talpi/plan.md` with `status: approved` — infer `planning`.
+- `.talpi/plan.md` has `status: approved` — infer `building`, and
+  reconstruct `current_phase` and `phases_total` from the journal per
+  the Conflict Rule above (the plan's phase count and the journal's most
+  recent phase-advance or halt line).
+
 ## Routing
 
 Read `.talpi/state.md`'s `run_status` and route:
@@ -35,8 +50,9 @@ Read `.talpi/state.md`'s `run_status` and route:
   resumed run has the same context a continuous session would have had —
   what's done, the concrete next step, and any gotchas recorded for it.
 - **`done`** — do not re-enter the pipeline. Summarize the run for the
-  human from `.talpi/state.md`, `.talpi/plan.md`, and the journal: what
-  was built, how many phases, and the outcome of final acceptance.
+  human from `.talpi/state.md`, `.talpi/plan.md`, and the journal (the
+  `run done` line marks the human's final acceptance): what was built,
+  how many phases, and the outcome of final acceptance.
 - **`halted`** — do not resume automatically. Find the `run halted:
   <reason>` line in `.talpi/journal.md` (the most recent one, per the
   conflict rule), present that reason to the human together with the

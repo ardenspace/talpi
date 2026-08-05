@@ -83,8 +83,9 @@ On approval:
 
 1. Change the first line of `.talpi/plan.md` from `status: draft` to
    `status: approved`.
-2. Update `.talpi/state.md`: `run_status: building`, `current_phase: 1`,
-   `phases_total: <n>` (n = the number of phases in the approved plan).
+2. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
+   building`, `current_phase: 1`, `phases_total: <n>` (n = the number of
+   phases in the approved plan), `updated: <ISO date>`.
 3. Append an event to `.talpi/journal.md` recording that the plan was
    approved and how many phases it has.
 4. Tell the human the run is now autonomous: there are no more

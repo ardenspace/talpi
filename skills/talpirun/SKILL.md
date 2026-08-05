@@ -20,10 +20,18 @@ first line is not `status: approved`, do not start building — report
 that no approved plan exists yet and route to the talpiplan skill
 instead.
 
+If `.talpi/state.md` reads `run_status: halted`, do not build — hand
+off to the talpiresume skill so the human can rule on the halt first.
+
 Read `.talpi/state.md` for `current_phase` and `phases_total` and work
 the plan one phase at a time starting there. If `current_phase` is
 already past `phases_total`, the run should already be `done`; check
 `.talpi/journal.md` for what happened instead of re-running a phase.
+If the journal's tail is `run done`, the run is genuinely finished —
+report that. If instead the tail is `final report sent, awaiting
+acceptance` with no later `run done` line, completion already ran and
+is waiting on the human — remind them the final report is pending
+their acceptance and wait; do not rebuild or re-send the report.
 
 ## Phase loop
 
@@ -110,7 +118,10 @@ journal entry noting the run resumed after reverting the decision. In
 both cases, `state.md` must never be left reading `halted` once the run
 is actually moving again. Every stop-report — halted or not — includes
 the one-line resume command, so the human, or the next session, knows
-exactly how to continue.
+exactly how to continue. The resume command is simply: start a fresh
+Claude Code session in the project directory. The plugin's
+session-start hook detects `.talpi/` on disk and routes automatically
+to the talpiresume skill — there is nothing else to type or remember.
 
 All other escalations are non-blocking: list them in the phase report
 and keep going.
@@ -137,8 +148,26 @@ verification is clean or resolved:
    the break as a task, dispatch a fresh implementer subagent to fix
    it, and re-run the smoke scenario before attempting completion
    again.
-2. Send the final report asking the human for acceptance.
-3. Set `.talpi/state.md`'s `run_status: done`, and journal `run done`.
+2. Send the final report asking the human for acceptance. Human
+   acceptance is the final gate — completion is not done until they
+   say so.
+3. Journal `final report sent, awaiting acceptance`. Leave
+   `.talpi/state.md`'s `run_status` at `building` — the run is not
+   `done` yet — and rewrite `.talpi/handoff.md` so a fresh session
+   landing here knows the build is finished and is waiting on the
+   human's acceptance, not mid-phase work.
+4. Wait for the human's response, same as any other stop-report: the
+   run does not send further reports on its own from here.
+
+**On acceptance:** rewrite `.talpi/state.md` in full, all four keys:
+`run_status: done`, `current_phase` and `phases_total` unchanged,
+`updated: <ISO date>`. Journal `run done`.
+
+**On rejection:** treat it like a broken smoke run — this is not an
+escalation, it reopens the phase loop. Turn the human's feedback into
+one or more tasks, dispatch fresh implementer subagents the same as
+any other task, re-run the affected contract tests, then repeat
+Completion (smoke run through asking for acceptance again) from step 1.
 
 Nothing about completion is heavyweight: the boundaries were already
 guarded by contracts through every phase, and internals were built to

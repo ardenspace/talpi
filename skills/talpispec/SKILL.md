@@ -93,6 +93,17 @@ same section names, same order, `status: draft` as the first line. Fill
 in every section from the Act 1 and Act 2 conversation; do not leave
 template hint comments in the final file.
 
+The first time this draft is written, also initialize `.talpi/state.md`
+if it does not already exist, with all four keys `docs/state-format.md`
+defines — partial writes are invalid:
+
+```
+run_status: speccing
+current_phase: 0
+phases_total: 0
+updated: <ISO date>
+```
+
 Present the spec to the human (including any open `[NOTE]` findings) and
 ask them to approve it. Do not proceed on silence or an ambiguous
 response — wait for an explicit approval.
@@ -101,7 +112,9 @@ On approval:
 
 1. Change the first line of `.talpi/spec.md` from `status: draft` to
    `status: approved`.
-2. Update `.talpi/state.md`: set `run_status: planning`.
+2. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
+   planning`, `current_phase: 0`, `phases_total: 0`, `updated: <ISO
+   date>`.
 3. Append an event to `.talpi/journal.md` recording that the spec was
    approved.
 4. Hand off to the talpiplan skill.
