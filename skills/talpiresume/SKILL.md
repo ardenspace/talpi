@@ -11,7 +11,7 @@ counterpart to talpirun's persistence discipline: if talpirun's job is to
 make sure disk state is always enough to resume from, talpiresume's job is
 to do that resuming.
 
-## Conflict rule
+## Conflict Rule
 
 `journal.md` is append-only; where entries conflict, the latest line wins.
 `state.md` is a convenience snapshot — if it contradicts the journal, trust
@@ -41,15 +41,16 @@ Read `.talpi/state.md`'s `run_status` and route:
   <reason>` line in `.talpi/journal.md` (the most recent one, per the
   conflict rule), present that reason to the human together with the
   relevant context from `.talpi/handoff.md`, and ask them how to proceed —
-  ratify, reject, or otherwise resolve — before anything continues. This
-  mirrors talpirun's halt/resume flow: only after the human rules does
-  `run_status` move back to `building`, and that transition belongs to
-  talpirun, not to talpiresume.
+  ratify, reject, or otherwise resolve — before anything continues. Once
+  the human rules, hand off to the talpirun skill: executing the decision
+  (ledger/spec update on ratify, or revert plus a fresh verifier re-check
+  on reject), setting `run_status` back to `building`, and journaling the
+  resume are talpirun's job, not talpiresume's.
 
 If `.talpi/` does not exist at all, there is no run to resume — report
 that and suggest starting with talpispec instead.
 
-## Status questions
+## Status Questions
 
 If the human is only asking where the run stands ("where are we?",
 "what's the status?") rather than asking to continue, answer from disk —
