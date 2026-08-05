@@ -55,8 +55,9 @@ the synthesis of lessons from two predecessor plugins built by the author:
 3. BUILD   Autonomous. Per phase: pin boundary contracts as tests first,
            then implement freely inside them. No per-task verification.
 4. VERIFY  At each phase end: one fresh-session independent verifier.
-           Fix what's fixable; escalate the rest. Non-blocking report
-           to the human; the run continues.
+           Fix what's fixable; escalate the rest. Reports are
+           non-blocking — except violations of Decided (hard-to-change)
+           decisions, which halt the run for the human.
 5. DONE    All contract tests green + smoke run + human acceptance.
 ```
 
@@ -94,7 +95,7 @@ concretely ("that core flow — does it need to work offline?").
    *explicitly delegated* to the agent and stay out of the spec.
 4. **Conventions** — design tokens/theme, shared-utility policy ("this kind
    of logic gets extracted globally"), naming/layout rules, user-visible
-   failure behavior. Seeds `CONVENTIONS.md`.
+   failure behavior. Seeds `.talpi/conventions.md`.
 
 ★ = talpi's signature lenses.
 
@@ -128,7 +129,7 @@ The spec contains, at minimum:
 ### 3.3 Plan stage
 
 Phase decomposition (phases are meaningful product increments, not task
-lists), plus the first draft of `CONVENTIONS.md`. Human approves both.
+lists), plus the first draft of `.talpi/conventions.md`. Human approves both.
 This is the **last mandatory human gate** — everything after runs
 autonomously until final acceptance.
 
@@ -158,15 +159,23 @@ lenses mirror the philosophy:
 2. **Smuggled irreversible decisions** — schema changes, new external
    dependencies, API shape changes that never went through the human →
    escalate to the human in the phase report.
-3. **Conventions & duplication** — violations of `CONVENTIONS.md`,
+3. **Conventions & duplication** — violations of `.talpi/conventions.md`,
    copy-pasted logic that should use the shared layer, hardcoded values
    the theme should own. *No taste-based style comments* — every finding
    must cite the conventions doc or a contract. Internals otherwise pass
    if refactorability is intact.
 
-The agent fixes what it can, then sends a **non-blocking phase report**
-(chat/Telegram): what shipped, verifier findings, anything escalated. The
-run continues to the next phase; the human interjects only if they want to.
+**Escalations are two-tier.** A finding that alters an entry on the
+Reversibility Ledger's **Decided** list is blocking: the run halts
+(`run_status: halted`, reason journaled) and the report asks the human to
+rule. If the human ratifies the change, the ledger and spec are updated and
+the run continues; if they reject it, the agent reverts the decision first,
+a fresh-session verifier re-checks the revert, and only then does the run
+continue. All other escalations are non-blocking.
+
+The agent fixes what it can, then sends a **phase report** (chat): what
+shipped, verifier findings, anything escalated. Unless halted, the run
+continues to the next phase; the human interjects only if they want to.
 
 ### 3.6 Completion
 
@@ -183,10 +192,16 @@ guarded by contracts, and internals were designed to be cheap to change.
 - **State lives on disk, in Markdown, and is the single source of truth.**
   Design assumption: *any session can die at any moment.* State directory:
   `.talpi/` in the target project (spec, plan, state, journal, handoff).
-- **Context lifecycle never involves the human.** At a context threshold
-  the agent writes a handoff and a fresh session resumes from disk —
-  automatically. Human checkpoints are *semantic* (phase reports,
-  approvals); context exhaustion is *mechanical* and self-served.
+- **Context is self-served; only restarts involve the human.** A live
+  session never runs out of road: the harness auto-compacts, and a
+  session-start hook re-routes a compacted or fresh session back into the
+  pipeline — context exhaustion never summons the human. Every *semantic*
+  stop (phase report, halt, completion) is reported to chat and includes
+  the one-line resume command. If a session dies outright (crash, closed
+  terminal, reboot), nothing is lost — state is always on disk; the human
+  restarts with one command and the hook resumes from the right point.
+  There is no supervisor process; a long silence in chat is itself the
+  signal that the session died.
 - **Visibility is the chat itself** (terminal or Telegram). No dashboard —
   phase reports and on-demand status questions cover it. State files are
   written human-readable so a dashboard *could* be layered on later, but
@@ -201,7 +216,8 @@ guarded by contracts, and internals were designed to be cheap to change.
   if no, go fast") come after v1 — built *with* talpi v1 on talpi itself
   (dogfooding).
 - **Non-goals for v1**: dashboard, multi-harness portability, multi-user
-  features, feature/refactor workflows (v2, dogfooded).
+  features, supervisor process (manual one-command restart instead),
+  feature/refactor workflows (v2, dogfooded).
 
 ## 6. Language
 
