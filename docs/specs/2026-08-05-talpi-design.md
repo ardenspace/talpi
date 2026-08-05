@@ -137,6 +137,15 @@ autonomously until final acceptance.
 
 - **Contracts first.** At the start of each phase, the agent pins that
   phase's boundary contracts as tests — then implements freely inside them.
+- **Task-unit subagents.** The build session is a thin orchestrator — it
+  manages state, dispatches, and reports; it never implements inline.
+  Each task (contract pinning is the first task of every phase) goes to a
+  fresh implementer subagent that reads `.talpi/conventions.md`, the
+  phase's contracts, and its task description — no conversation history.
+  This keeps the orchestrator's context lean for long runs, and forces
+  disk state to be the real continuity mechanism on every single task.
+  A subagent's questions come back as results; the orchestrator relays
+  them to the human under the routing rule below.
 - **No per-task verification.** No reviewer panels, no per-task test
   ceremony. The contract tests are the safety net.
 - **Internal decisions are the agent's.** Only *product-external* questions
