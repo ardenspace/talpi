@@ -30,5 +30,17 @@ if [ -f "$M" ]; then
   [ "$mname" = "talpi" ] && ok || fail "marketplace.json plugin name != talpi"
 fi
 
+# 4) Hook wiring: hooks.json parses, references an existing script,
+#    and covers compact (the pslog lesson).
+H="$ROOT/hooks/hooks.json"
+if [ ! -f "$H" ]; then fail "missing hooks/hooks.json"
+elif ! python3 -m json.tool "$H" >/dev/null 2>&1; then fail "invalid JSON: $H"
+else
+  ok
+  grep -q 'compact' "$H" && ok || fail "hooks.json matcher does not cover compact"
+  [ -f "$ROOT/hooks/session-start.sh" ] && ok || fail "missing hooks/session-start.sh"
+  sh -n "$ROOT/hooks/session-start.sh" 2>/dev/null && ok || fail "session-start.sh has syntax errors"
+fi
+
 echo "manifest.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
