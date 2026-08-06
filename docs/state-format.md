@@ -39,7 +39,7 @@ Sections:
 - One `## Phase <n>: <name>` section per phase, each containing:
   - A goal line (one sentence summarizing what that phase achieves)
   - A `Contracts:` line listing which boundary contracts from spec.md this phase pins (e.g., `Contracts: B1, B3`)
-  - Task checkboxes in Markdown format (`- [ ] <task description>`)
+  - Step checkboxes in Markdown format (`- [ ] <step description>`) — one step per implementer-subagent dispatch. `talpirun` ticks each to `- [x]` in the same commit that lands the step's work, so the checkboxes are the canonical mid-phase progress record.
 
 The plan is the source of truth for phase numbering and sequencing.
 
@@ -74,7 +74,7 @@ Exactly these keys appear, one per line:
     found something that alters an entry on the spec's Reversibility
     Ledger **Decided** list. The reason lives in journal.md's
     `run halted: <reason>` line, not here.
-- `current_phase: <n>` — the current phase number (0 before any build phase starts)
+- `current_phase: <n>` — the current phase number (0 before any build phase starts; rests one past `phases_total` once the last phase has reported and the run is in completion)
 - `phases_total: <n>` — total number of phases in the plan
 - `updated: <ISO date>` — timestamp of the last update to this file
 
@@ -96,6 +96,8 @@ Format: `- [<ISO date>] <event>` — one event per line.
 
 When a run halts, a journal line is written to explain why: `run halted: <reason>`. This line always accompanies a state.md transition to `run_status: halted`.
 
+The `phase <n> started (base: <hash>)` event records the commit the phase's diff range starts from; the phase-end verifier reviews `<hash>..HEAD`.
+
 Example events (illustrative, not exhaustive):
 ```markdown
 - [2026-08-05T10:00:00Z] run started: speccing
@@ -103,7 +105,8 @@ Example events (illustrative, not exhaustive):
 - [2026-08-05T11:30:00Z] run started: planning
 - [2026-08-05T14:00:00Z] plan approved, 4 phases
 - [2026-08-05T14:05:00Z] run started: building
-- [2026-08-05T14:32:00Z] phase 1 complete
+- [2026-08-05T14:06:00Z] phase 1 started (base: 3f2c9a1)
+- [2026-08-05T14:32:00Z] phase 1 verified
 - [2026-08-05T16:45:00Z] run halted: verifier found auth model changed from spec
 ```
 
@@ -120,7 +123,7 @@ A session reading `handoff.md` + `state.md` + `conventions.md` (without any prio
 Sections:
 
 - `## Done so far` — summary of completed work, phase by phase or by category
-- `## Next step` — concrete, unambiguous next action (e.g., "Implement the user-auth module per Phase 2, task 3")
+- `## Next step` — concrete, unambiguous next action (e.g., "Implement the user-auth module per Phase 2, step 3")
 - `## Gotchas` — known pitfalls, dependency issues, edge cases, or open questions that may trip up the next session
 
 Example:
@@ -131,7 +134,7 @@ Phase 1 (Setup) is complete. Database schema is defined and migrations run. Fron
 
 ## Next step
 
-Implement the user-auth controller in Phase 2. Start with the login endpoint as described in plan.md Phase 2, task 2.
+Implement the user-auth controller in Phase 2. Start with the login endpoint as described in plan.md Phase 2, step 2.
 
 ## Gotchas
 

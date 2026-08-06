@@ -33,7 +33,7 @@ Full rationale and design record:
 2. PLAN    Phase decomposition + conventions.md draft
            → HUMAN APPROVAL (required — last mandatory human gate)
 3. BUILD   Autonomous. Per phase: pin boundary contracts as tests first,
-           then implement freely inside them. No per-task verification.
+           then implement freely inside them. No per-step verification.
 4. VERIFY  At each phase end: one fresh-session independent verifier.
            Fix what's fixable; escalate the rest. Reports are
            non-blocking — except violations of Decided (hard-to-change)
@@ -48,10 +48,10 @@ panel. `talpiplan` decomposes the approved spec into phases and drafts
 `.talpi/conventions.md` — the last mandatory human gate before the build
 runs unattended. `talpirun` is the autonomous core: at the start of each
 phase it pins that phase's boundary contracts as failing tests, then
-hands every task — contract-pinning included — to a fresh implementer
+hands every step — contract-pinning included — to a fresh implementer
 subagent, so the orchestrating session stays a thin dispatcher and never
-implements inline; disk state, not conversation history, is what a task
-inherits. At each phase's end, one fresh-session verifier checks contract
+implements inline; each step lands as its own commit, and disk state,
+not conversation history, is what a step inherits. At each phase's end, one fresh-session verifier checks contract
 adherence, smuggled irreversible decisions, and convention drift, then
 fixes what it can and reports to chat. Escalation is two-tier: most
 findings are non-blocking, but a finding that touches a Decided
@@ -69,7 +69,7 @@ hook resumes it from the right point.
 |---|---|
 | `talpispec` | Turns a product idea into an approved `.talpi/spec.md` through a two-act conversation (freeform product talk, then a four-lens design interview) and a fresh-session review panel. |
 | `talpiplan` | Decomposes the approved spec into phases and drafts `.talpi/conventions.md` — the last mandatory human gate before the build runs autonomously. |
-| `talpirun` | Executes the plan phase by phase: pins boundary contracts as tests first, dispatches fresh implementer subagents per task, verifies each phase with one fresh-session reviewer, and reports non-blocking. |
+| `talpirun` | Executes the plan phase by phase: pins boundary contracts as tests first, dispatches fresh implementer subagents per step (one commit per step), verifies each phase with one fresh-session reviewer, and reports non-blocking. |
 | `talpiresume` | Reads `.talpi/` state off disk and routes a fresh session back into the pipeline at the right point — after a compact, a crash, or a restart. |
 
 ## State

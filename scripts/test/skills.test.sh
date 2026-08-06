@@ -35,5 +35,17 @@ hits="$(grep -rniE 'telegram|slack|discord' "$ROOT/skills" 2>/dev/null)" || true
 [ -z "${hits:-}" ] && ok || fail "channel-specific terms in skills:
 $hits"
 
+# 5) Step vocabulary: work units are "steps", never "tasks" — avoids
+#    collision with the harness's own Task/subagent naming.
+hits="$(grep -rniE '\btasks?\b' "$ROOT/skills" 2>/dev/null)" || true
+[ -z "${hits:-}" ] && ok || fail "\"task\" wording in skills (use \"step\"):
+$hits"
+
+# 6) No repo-relative doc paths: a skill runs inside the target
+#    project, where this repo's docs/ does not exist.
+hits="$(grep -rn 'docs/' "$ROOT/skills" 2>/dev/null)" || true
+[ -z "${hits:-}" ] && ok || fail "repo-relative docs/ path in skills:
+$hits"
+
 echo "skills.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

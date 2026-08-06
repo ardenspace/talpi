@@ -69,7 +69,8 @@ implies (or vice versa) is one decision artificially split into two.
 Write `.talpi/plan.md` from `references/plan-template.md`: `status:
 draft` as the first line, then one `## Phase <n>: <name>` section per
 phase, each with a one-sentence goal line, a `Contracts:` line, and
-`- [ ]` task checkboxes for its work.
+`- [ ]` step checkboxes for its work — one step per fresh implementer
+subagent that talpirun will dispatch, committed one commit per step.
 
 Present the plan and the conventions draft together and ask the human
 to approve them. Iterate on either or both until they do — do not
@@ -83,7 +84,9 @@ On approval:
    building`, `current_phase: 1`, `phases_total: <n>` (n = the number of
    phases in the approved plan), `updated: <ISO date>`.
 3. Append an event to `.talpi/journal.md` recording that the plan was
-   approved and how many phases it has.
+   approved and how many phases it has (`- [<ISO date>] plan approved,
+   <n> phases` — journal lines are always `- [<ISO date>] <event>`,
+   append-only).
 4. Tell the human the run is now autonomous: there are no more
    mandatory approval gates until a phase report arrives, or the run
    halts on an escalation. Hand off to the talpirun skill.

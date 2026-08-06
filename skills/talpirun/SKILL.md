@@ -24,17 +24,21 @@ If `.talpi/state.md` reads `run_status: halted`, do not build — hand
 off to the talpiresume skill so the human can rule on the halt first.
 
 Read `.talpi/state.md` for `current_phase` and `phases_total` and work
-the plan one phase at a time starting there. If `current_phase` is at
-or past `phases_total`, the run should already be `done`; check
-`.talpi/journal.md` for what happened instead of re-running a phase.
-If the journal's tail is `run done`, the run is genuinely finished —
-report that. If the tail is `final report sent, awaiting acceptance`
-with nothing later, completion already ran and is waiting on the
-human — remind them the final report is pending their acceptance and
-wait; do not rebuild or re-send the report. If instead the tail is
-`acceptance declined: <summary>`, or shows fix-loop events after the
-awaiting-acceptance line, the human already responded and the
-reopened fix work is in progress — continue the phase loop rather
+the plan one phase at a time starting there. `current_phase` equal to
+`phases_total` is normal — it means the last phase is the one being
+built. Only `current_phase` *past* `phases_total` means the phase loop
+is over (the last phase's report advanced the counter); then check
+`.talpi/journal.md` for where completion stands instead of re-running
+a phase. If the journal's tail is `run done`, the run is genuinely
+finished — report that. If the tail is `phase <phases_total> reported`
+with nothing later, the phase loop finished but completion never ran —
+go straight to Completion. If the tail is `final report sent, awaiting
+acceptance` with nothing later, completion already ran and is waiting
+on the human — remind them the final report is pending their
+acceptance and wait; do not rebuild or re-send the report. If instead
+the tail is `acceptance declined: <summary>`, or shows fix-loop events
+after the awaiting-acceptance line, the human already responded and
+the reopened fix work is in progress — continue the phase loop rather
 than waiting.
 
 ## Phase loop
@@ -43,23 +47,26 @@ For the phase identified by `current_phase` in `.talpi/state.md`, work
 through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
 
 1. **Thin orchestrator.** The talpirun session never implements inline.
-   It manages state, dispatches one fresh implementer subagent per task
+   It manages state, dispatches one fresh implementer subagent per step
    in the phase, and reports — nothing more. Each subagent starts with
    no conversation history; it receives `.talpi/conventions.md`, the
    phase's contracts (the `B<n>` shapes from spec.md that the phase's
-   `Contracts:` line names), and its own task description from
+   `Contracts:` line names), and its own step description from
    plan.md, and nothing else. This keeps the orchestrator's own context
    lean for long runs, and forces disk state — not conversation memory
-   — to be the real continuity mechanism on every single task.
-   Journal `phase <n> started` when the phase's first task is
-   dispatched.
-2. **Pin contracts.** The first task of every phase writes that phase's
+   — to be the real continuity mechanism on every single step.
+   Journal `phase <n> started (base: <hash>)` when the phase's first
+   step is dispatched, where `<hash>` is the commit HEAD points at just
+   before that step — the phase's diff range starts there. (Every
+   journal entry, here and below, is one appended line of the form
+   `- [<ISO date>] <event>` — journal.md is never rewritten.)
+2. **Pin contracts.** The first step of every phase writes that phase's
    `Contracts:` list as failing tests, before any other implementation
-   task runs. Journal `phase <n> contracts pinned` once those tests
+   step runs. Journal `phase <n> contracts pinned` once those tests
    exist and fail for the right reason — missing implementation, not a
    broken test.
-3. **Implement freely.** The phase's remaining tasks run the same way,
-   one fresh subagent per task, but with no per-task verification
+3. **Implement freely.** The phase's remaining steps run the same way,
+   one fresh subagent per step, but with no per-step verification
    ceremony and no reviewer panels mid-phase. Internal implementation
    decisions belong to the implementer. Each subagent returns its
    result plus any questions it has for the human. The orchestrator
@@ -72,7 +79,17 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    > Decided list. Everything else is yours — the ledger's Delegated
    > list is your license.
 
-4. **Contracts green.** Once every task in the phase is done and the
+4. **One step, one commit.** When a step's subagent returns and its
+   work is accepted, the orchestrator marks that step's checkbox
+   `- [x]` in `.talpi/plan.md` and commits the step's work — the code,
+   the plan.md tick, and any conventions.md update it triggered — as a
+   single commit: `talpi: phase <n> step <k>: <short description>`.
+   This holds for the contract-pinning step too (its tests are
+   committed failing — they fail for the right reason). Never batch
+   steps into one commit, and never leave a finished step uncommitted:
+   plan.md's checkboxes plus `git log` are how a fresh session
+   reconstructs mid-phase progress.
+5. **Contracts green.** Once every step in the phase is done and the
    phase's pinned contract tests are green, move to phase-end
    verification.
 
@@ -80,14 +97,17 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
 
 Dispatch exactly one fresh-context verifier — no conversation history —
 using `references/verifier-prompt.md`, filling in the phase number, the
-project name, and the diff range covering this phase's work.
+project name, and the diff range covering this phase's work:
+`<base>..HEAD`, where `<base>` is the hash recorded in the phase's
+`phase <n> started (base: <hash>)` journal line.
 
 The verifier returns one line per finding, `[FIX]` or `[ESCALATE]`, or
 returns exactly `CLEAN`. Fix every `[FIX]` finding before moving on —
 send it back to a fresh implementer subagent, the same as any other
-task; the thin-orchestrator rule holds here too, so the talpirun session
+step; the thin-orchestrator rule holds here too, so the talpirun session
 never fixes a finding inline itself, no matter how trivial it looks —
-then re-run the phase's contract tests. Carry every `[ESCALATE]` finding
+then re-run the phase's contract tests and commit the fix the same way
+(`talpi: phase <n> fix: <short summary>`). Carry every `[ESCALATE]` finding
 forward into the phase report; do not resolve it yourself.
 
 Journal `phase <n> verified` once the verifier has run and any `[FIX]`
@@ -135,8 +155,10 @@ and keep going.
 Rewrite `.talpi/handoff.md` at every phase boundary, and again whenever
 context runs low mid-phase — not just at the edges. State on disk is
 the only truth talpirun relies on: `handoff.md` plus `state.md` plus
-`conventions.md` must be enough for a fresh session with no conversation
-history to pick up exactly where this one left off. The human is never
+`conventions.md` — with plan.md's step checkboxes and the one-commit-
+per-step log recording exactly which steps have landed — must be enough
+for a fresh session with no conversation history to pick up exactly
+where this one left off. The human is never
 summoned for context reasons alone — context exhaustion is a disk-write
 problem, not a human problem.
 
@@ -149,7 +171,7 @@ verification is clean or resolved:
    smoke scenario from `.talpi/spec.md`'s Product Picture, for real,
    not as a test file. If the smoke run breaks, that is not a
    completion blocker to escalate — it reopens the phase loop: treat
-   the break as a task, dispatch a fresh implementer subagent to fix
+   the break as a step, dispatch a fresh implementer subagent to fix
    it, and re-run the smoke scenario before attempting completion
    again.
 2. Send the final report asking the human for acceptance. Human
@@ -171,8 +193,8 @@ verification is clean or resolved:
 escalation, it reopens the phase loop. Journal `acceptance declined:
 <summary>` first, so the journal tail reflects what happened; the
 reopened work then journals its own phase events the normal way. Turn
-the human's feedback into one or more tasks, dispatch fresh implementer
-subagents the same as any other task, re-run the affected contract
+the human's feedback into one or more steps, dispatch fresh implementer
+subagents the same as any other step, re-run the affected contract
 tests, then repeat Completion (smoke run through asking for acceptance
 again) from step 1.
 

@@ -56,6 +56,12 @@ Read `.talpi/state.md`'s `run_status` and route:
   `.talpi/conventions.md`, and the tail of `.talpi/journal.md` so the
   resumed run has the same context a continuous session would have had —
   what's done, the concrete next step, and any gotchas recorded for it.
+  Mid-phase position comes from `.talpi/plan.md` itself: the current
+  phase's first unchecked `- [ ]` step is the next dispatch (talpirun
+  ticks a checkbox in the same commit that lands its step). If the
+  working tree has uncommitted changes, that first unchecked step was
+  in flight when the session died — hand the diff to that step's fresh
+  implementer subagent as context rather than discarding it.
 - **`done`** — do not re-enter the pipeline. Summarize the run for the
   human from `.talpi/state.md`, `.talpi/plan.md`, and the journal (the
   `run done` line marks the human's final acceptance): what was built,

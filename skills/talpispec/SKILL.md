@@ -96,8 +96,8 @@ lens's answers, recorded verbatim in the spec's `## Conventions`
 section — so a session death after approval loses nothing.
 
 The first time this draft is written, also initialize `.talpi/state.md`
-if it does not already exist, with all four keys `docs/state-format.md`
-defines — partial writes are invalid:
+if it does not already exist, with exactly these four keys — partial
+writes are invalid:
 
 ```
 run_status: speccing
@@ -118,5 +118,7 @@ On approval:
    planning`, `current_phase: 0`, `phases_total: 0`, `updated: <ISO
    date>`.
 3. Append an event to `.talpi/journal.md` recording that the spec was
-   approved.
+   approved (`- [<ISO date>] spec approved` — journal lines are always
+   `- [<ISO date>] <event>`, append-only; create the file if this is
+   its first entry).
 4. Hand off to the talpiplan skill.
