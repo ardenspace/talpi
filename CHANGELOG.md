@@ -17,6 +17,10 @@
 - Skills no longer reference repo-relative `docs/` paths (unresolvable
   inside a target project); the journal line format is stated inline
   where skills append events. Both guarded by new contract tests.
+- Session-start hook: resolves the project root via
+  `CLAUDE_PROJECT_DIR` (detects `.talpi/` when the session opens in a
+  subdirectory) and stays quiet once a run is `done` instead of
+  nagging every future session; behavior covered by contract tests.
 
 ## 0.1.0 — 2026-08-05
 - Initial release: the 0→1 MVP pipeline.

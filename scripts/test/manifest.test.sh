@@ -42,5 +42,22 @@ else
   sh -n "$ROOT/hooks/session-start.sh" 2>/dev/null && ok || fail "session-start.sh has syntax errors"
 fi
 
+# 5) Hook behavior: resolves the project root (works from subdirs),
+#    surfaces unfinished runs, stays quiet on done or no .talpi/.
+S="$ROOT/hooks/session-start.sh"
+if [ -f "$S" ]; then
+  T="$(mktemp -d)"
+  mkdir -p "$T/proj/.talpi" "$T/proj/sub"
+  printf 'run_status: building\ncurrent_phase: 1\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
+  out="$(cd "$T/proj/sub" && CLAUDE_PROJECT_DIR="$T/proj" sh "$S")"
+  echo "$out" | grep -q 'run_status: building' && ok || fail "hook missed run from subdir via CLAUDE_PROJECT_DIR"
+  printf 'run_status: done\ncurrent_phase: 2\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
+  out="$(cd "$T/proj" && CLAUDE_PROJECT_DIR="$T/proj" sh "$S")"
+  [ -z "$out" ] && ok || fail "hook not quiet when run_status is done"
+  out="$(cd "$T" && CLAUDE_PROJECT_DIR="$T" sh "$S")"
+  [ -z "$out" ] && ok || fail "hook not quiet without .talpi/"
+  rm -rf "$T"
+fi
+
 echo "manifest.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
