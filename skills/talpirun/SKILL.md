@@ -64,7 +64,12 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    `Contracts:` list as failing tests, before any other implementation
    step runs. Journal `phase <n> contracts pinned` once those tests
    exist and fail for the right reason — missing implementation, not a
-   broken test.
+   broken test. If the phase's `Contracts:` line is empty (a phase may
+   legitimately pin nothing when its boundaries were pinned by earlier
+   phases), there is no pinning step: journal `phase <n> contracts:
+   none` instead when the phase's first step is dispatched, and let
+   that first step be whatever the plan says it is — usually plain
+   behavior tests.
 3. **Implement freely.** The phase's remaining steps run the same way,
    one fresh subagent per step, but with no per-step verification
    ceremony and no reviewer panels mid-phase. Internal implementation

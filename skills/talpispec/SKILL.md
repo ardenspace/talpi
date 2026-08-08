@@ -84,7 +84,30 @@ Collect findings from all three. Each finding is `[BLOCKING]` or
   they choose.
 
 Do not proceed to Approval while any `[BLOCKING]` finding is
-unresolved.
+unresolved — but resolution has exactly three forms: fix the spec,
+have the human overrule the finding (below), or both. The panel never
+gets an unbounded veto.
+
+**Re-run scoping and cap.** A full, unscoped panel does not converge:
+fresh reviewers mint new findings every round, and the adversarial and
+boundary lenses pull the same lines in opposite directions
+(over-specification vs. untestability). So only the *first* panel run
+is unscoped. Each re-run prompt must include the list of findings
+already adjudicated (fixed or overruled) and instruct reviewers:
+`[BLOCKING]` is reserved for problems *introduced by the latest spec
+changes* and for previously-`[BLOCKING]` items still unresolved;
+anything else — including disagreement with an already-adjudicated
+resolution — is at most `[NOTE]`. Cap re-runs at two. If any
+`[BLOCKING]` survives the cap, do not keep looping: present each
+surviving finding to the human to either fix (one final targeted edit,
+no further panel) or overrule.
+
+**Human overrule.** The human may overrule any `[BLOCKING]` finding.
+Record each overruled finding in the spec's Reversibility Ledger
+`Decided` list as a one-line conscious decision (what the panel
+objected to, and that the human considered and overruled it). An
+overruled finding is resolved; reviewers in later re-runs must treat
+it as adjudicated.
 
 ## Approval
 
