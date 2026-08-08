@@ -7,6 +7,11 @@ Check exactly three things:
 1. Contract adherence — does the implementation match the phase's
    boundary contracts, and do the contract tests genuinely pin those
    boundaries (not hollowed out, not testing mocks of themselves)?
+   Where a contract is exercised only through a designated test seam
+   (an env-var override, a sandboxed path, an injected fake), read the
+   code of the real-world default path the seam bypasses — seam-only
+   tests can leave the primary path violating the very clause the
+   tests appear to pin.
 2. Smuggled irreversible decisions — schema changes, new external
    dependencies, API shape changes, or anything on the Reversibility
    Ledger's Decided list that was altered without the human. These are

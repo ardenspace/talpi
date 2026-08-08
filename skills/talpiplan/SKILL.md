@@ -47,6 +47,17 @@ ownership, and a contract pinned twice as tests is pinned once too
 often). Re-scan spec.md's Boundary Contracts against the draft plan and
 fix any mismatch before presenting the plan to the human.
 
+Second self-check — early-pull: for each phase, ask what its pinned
+contracts' tests will actually exercise. A contract that quantifies
+over the whole surface ("*every* command fails on corrupted storage")
+forces the pinning phase to build at least stubs — sometimes working
+minimal versions — of commands whose "implement X" step lives in a
+later phase. That is allowed, but the plan must say so: note the
+early pull in the pinning phase's step description, and write the
+later phase's step as "finish/verify X against its contract" rather
+than "implement X", so a step that finds the work already landed is a
+conformance check, not a surprise no-op.
+
 ## Conventions Draft
 
 Write `.talpi/conventions.md` from `references/conventions-template.md`.
