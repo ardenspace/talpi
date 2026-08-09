@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.2.1 — 2026-08-09
+- Acceptance rejection now appends a synthetic `Acceptance fixes`
+  phase to plan.md (steps get checkboxes, a journaled base hash, and
+  phase-end verification) and bumps `phases_total`, instead of running
+  fix steps outside the phase machinery.
+- talpirun guard: arriving from talpiresume with a human ruling on a
+  halt no longer bounces back to talpiresume — the ruling is executed
+  directly.
+- Phase loop: step acceptance now includes a mechanical tripwire
+  (build/typecheck/test before each step commit — no review ceremony);
+  every step's created files are carried to later subagents via a
+  `Prior work this phase` block in conventions.md; journal lines a
+  step produces ride in that step's commit, with commits as ground
+  truth for step completion.
+- Session-start hook announces `done` runs (routing talpiresume to a
+  no-work-remains confirmation) instead of staying silent — a silent
+  hook meant fresh sessions could restart the pipeline unaware.
+- talpiresume documents that `current_phase` past `phases_total` is
+  talpirun's normal completion convention, not a contradiction.
+- Docs no longer claim the hook "routes automatically" — it injects
+  guidance the session follows.
+- talpiplan: early-pull self-check (surface-sweeping contracts pull
+  later phases' stubs into the pinning phase; later steps say
+  finish/verify, not implement). Verifier prompt: seam-bypass check
+  (when contracts verify only through a test seam, read the real
+  default path the seam bypasses).
+- Reviewer panel re-runs after BLOCKING fixes are scoped and capped,
+  with an overrule path; last-phase report branch and contracts-less
+  phase journal event fixed.
+
 ## 0.2.0 — 2026-08-06
 - Commit discipline: one commit per step (`talpi: phase <n> step <k>:
   ...`), ticking the step's plan.md checkbox in the same commit; phase
