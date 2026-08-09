@@ -61,7 +61,8 @@ disk and routes a fresh session back into the pipeline at exactly the
 right point. There is no supervisor process watching the run — a live
 session self-serves its own context, and a long silence in chat is the
 signal that a session died; the human restarts with one command and the
-hook resumes it from the right point.
+session-start hook surfaces the run so talpiresume picks it up from the
+right point.
 
 ## Skills
 

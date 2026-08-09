@@ -22,6 +22,11 @@ instead.
 
 If `.talpi/state.md` reads `run_status: halted`, do not build — hand
 off to the talpiresume skill so the human can rule on the halt first.
+One exception: arriving *from* talpiresume with the human's ruling
+already in hand. Then `halted` on disk is expected — execute the
+ruling (the ratify/reject path under Phase report, which sets
+`run_status` back to `building`) instead of bouncing back to
+talpiresume.
 
 Read `.talpi/state.md` for `current_phase` and `phases_total` and work
 the plan one phase at a time starting there. `current_phase` equal to
@@ -39,7 +44,8 @@ acceptance and wait; do not rebuild or re-send the report. If instead
 the tail is `acceptance declined: <summary>`, or shows fix-loop events
 after the awaiting-acceptance line, the human already responded and
 the reopened fix work is in progress — continue the phase loop rather
-than waiting.
+than waiting (if plan.md has no Acceptance-fixes phase yet, appending
+it is the first move — see Completion's rejection path).
 
 ## Phase loop
 
@@ -74,10 +80,16 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    one fresh subagent per step, but with no per-step verification
    ceremony and no reviewer panels mid-phase. Internal implementation
    decisions belong to the implementer. Each subagent returns its
-   result plus any questions it has for the human. The orchestrator
+   result — including the files it created or significantly reshaped —
+   plus any questions it has for the human. The orchestrator
    registers any new shared utility a subagent reports in
-   `.talpi/conventions.md`, so the next subagent inherits it, and
-   relays questions to the human under this rule:
+   `.talpi/conventions.md`, so the next subagent inherits it. It also
+   appends one line per step to a `Prior work this phase` block in
+   conventions.md — `step <k>: <path> — <purpose>` — reset at each
+   phase start, so every later fresh subagent in the phase sees what
+   already exists and reuses it instead of recreating it; this is
+   unconditional, not just for utilities the implementer thought to
+   flag as shared. Questions are relayed to the human under this rule:
 
    > Ask the human only what a *user of the product* would notice, or
    > what touches a boundary contract or the Reversibility Ledger's
@@ -85,10 +97,22 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    > list is your license.
 
 4. **One step, one commit.** When a step's subagent returns and its
-   work is accepted, the orchestrator marks that step's checkbox
+   work is accepted — acceptance is mechanical, not a review: run the
+   cheapest check the project offers (build, typecheck, or the test
+   command if one exists) so no step lands a commit that breaks
+   compilation or leaves the suite unrunnable; a tripwire, not a
+   verification ceremony. If the step touched code but no such check
+   can run, journal `phase <n> step <k>: no mechanical check:
+   <reason>` and proceed — the orchestrator marks that step's checkbox
    `- [x]` in `.talpi/plan.md` and commits the step's work — the code,
-   the plan.md tick, and any conventions.md update it triggered — as a
-   single commit: `talpi: phase <n> step <k>: <short description>`.
+   the plan.md tick, any conventions.md update it triggered, and any
+   journal line the step produced (`started`, `contracts pinned`, `no
+   mechanical check`) — as a single commit: `talpi: phase <n> step
+   <k>: <short description>`. If a crash leaves these out of step,
+   recovery is mechanical: a step whose commit landed is done whatever
+   the journal says (commits are ground truth for steps; the journal
+   for phase events; state.md is a snapshot rewritten from the
+   journal).
    This holds for the contract-pinning step too (its tests are
    committed failing — they fail for the right reason). Never batch
    steps into one commit, and never leave a finished step uncommitted:
@@ -149,8 +173,10 @@ is actually moving again. Every stop-report — halted or not — includes
 the one-line resume command, so the human, or the next session, knows
 exactly how to continue. The resume command is simply: start a fresh
 Claude Code session in the project directory. The plugin's
-session-start hook detects `.talpi/` on disk and routes automatically
-to the talpiresume skill — there is nothing else to type or remember.
+session-start hook detects `.talpi/` on disk and injects guidance
+pointing the fresh session at the talpiresume skill — there is nothing
+else to type or remember. (The hook injects an instruction, it cannot
+force a skill invocation — the session follows the guidance.)
 
 All other escalations are non-blocking: list them in the phase report
 and keep going.
@@ -194,14 +220,20 @@ verification is clean or resolved:
 `run_status: done`, `current_phase` and `phases_total` unchanged,
 `updated: <ISO date>`. Journal `run done`.
 
-**On rejection:** treat it like a broken smoke run — this is not an
-escalation, it reopens the phase loop. Journal `acceptance declined:
-<summary>` first, so the journal tail reflects what happened; the
-reopened work then journals its own phase events the normal way. Turn
-the human's feedback into one or more steps, dispatch fresh implementer
-subagents the same as any other step, re-run the affected contract
-tests, then repeat Completion (smoke run through asking for acceptance
-again) from step 1.
+**On rejection:** this is not an escalation — it reopens the phase
+loop as a new phase, so the fix work gets the same machinery as any
+other phase. Journal `acceptance declined: <summary>` first, so the
+journal tail reflects what happened. Then append a synthetic phase to
+`.talpi/plan.md` — `## Phase <n+1>: Acceptance fixes`, one `- [ ]`
+step per piece of the human's feedback, and a `Contracts:` line naming
+the contracts the feedback touches (usually none — those boundaries
+were already pinned) — bump `phases_total` in `.talpi/state.md` to
+match, set `current_phase` to the new phase, and run it through the
+normal phase loop: fresh implementer subagents, one step one commit,
+phase-end verification. Its steps get plan.md checkboxes, its start
+journals a base hash, and a fresh session resumes it like any other
+phase. When it lands, repeat Completion (smoke run through asking for
+acceptance again) from step 1.
 
 Nothing about completion is heavyweight: the boundaries were already
 guarded by contracts through every phase, and internals were built to

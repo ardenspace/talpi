@@ -47,5 +47,22 @@ hits="$(grep -rn 'docs/' "$ROOT/skills" 2>/dev/null)" || true
 [ -z "${hits:-}" ] && ok || fail "repo-relative docs/ path in skills:
 $hits"
 
+# 7) State-model invariants: acceptance rejection reopens the loop as
+#    a real phase, and a halt ruling doesn't bounce between skills.
+R="$ROOT/skills/talpirun/SKILL.md"
+grep -q 'Acceptance fixes' "$R" && ok || fail "talpirun: rejection must append an Acceptance fixes phase"
+grep -q 'bouncing back' "$R" && ok || fail "talpirun: guard missing the halt-ruling exception"
+
+# 8) Phase-loop hardening: mechanical tripwire before step commits,
+#    unconditional intra-phase carry of created files.
+grep -q 'tripwire' "$R" && ok || fail "talpirun: no mechanical tripwire before step commits"
+grep -q 'Prior work this phase' "$R" && ok || fail "talpirun: no Prior-work-this-phase carry block"
+
+# 9) The hook injects guidance; it cannot invoke a skill. Prose must
+#    not overclaim "automatic" routing.
+hits="$(grep -rniE 'routes? automatically' "$ROOT/skills" "$ROOT/README.md" 2>/dev/null)" || true
+[ -z "${hits:-}" ] && ok || fail "\"routes automatically\" overclaim:
+$hits"
+
 echo "skills.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

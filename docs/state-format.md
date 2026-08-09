@@ -74,7 +74,7 @@ Exactly these keys appear, one per line:
     found something that alters an entry on the spec's Reversibility
     Ledger **Decided** list. The reason lives in journal.md's
     `run halted: <reason>` line, not here.
-- `current_phase: <n>` — the current phase number (0 before any build phase starts; rests one past `phases_total` once the last phase has reported and the run is in completion)
+- `current_phase: <n>` — the current phase number (0 before any build phase starts; rests one past `phases_total` once the last phase has reported and the run is in completion; an acceptance rejection appends an Acceptance-fixes phase to plan.md and bumps `phases_total` to match, putting the counters back in normal building range)
 - `phases_total: <n>` — total number of phases in the plan
 - `updated: <ISO date>` — timestamp of the last update to this file
 
