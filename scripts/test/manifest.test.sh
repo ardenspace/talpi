@@ -43,7 +43,8 @@ else
 fi
 
 # 5) Hook behavior: resolves the project root (works from subdirs),
-#    surfaces unfinished runs, stays quiet on done or no .talpi/.
+#    surfaces unfinished runs, reports done runs as no work, and stays
+#    quiet when no .talpi/ exists.
 S="$ROOT/hooks/session-start.sh"
 if [ -f "$S" ]; then
   T="$(mktemp -d)"
@@ -53,7 +54,8 @@ if [ -f "$S" ]; then
   echo "$out" | grep -q 'run_status: building' && ok || fail "hook missed run from subdir via CLAUDE_PROJECT_DIR"
   printf 'run_status: done\ncurrent_phase: 2\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
   out="$(cd "$T/proj" && CLAUDE_PROJECT_DIR="$T/proj" sh "$S")"
-  [ -z "$out" ] && ok || fail "hook not quiet when run_status is done"
+  echo "$out" | grep -q 'run_status: done' && ok || fail "hook did not report done run"
+  echo "$out" | grep -qi 'no work' && ok || fail "hook did not say done run has no work"
   out="$(cd "$T" && CLAUDE_PROJECT_DIR="$T" sh "$S")"
   [ -z "$out" ] && ok || fail "hook not quiet without .talpi/"
   rm -rf "$T"

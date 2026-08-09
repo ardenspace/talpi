@@ -6,8 +6,14 @@ ROOT="${CLAUDE_PROJECT_DIR:-.}"
 status="unknown"
 [ -f "$ROOT/.talpi/state.md" ] && \
   status="$(sed -n 's/^run_status: *//p' "$ROOT/.talpi/state.md" | head -1)"
-# A finished run needs no routing — stay quiet.
-[ "${status:-unknown}" = "done" ] && exit 0
+if [ "${status:-unknown}" = "done" ]; then
+  cat <<EOF
+This project has a talpi run on disk (run_status: done).
+Use the talpiresume skill only to confirm the run is done and no work
+remains. Do not restart the pipeline from scratch.
+EOF
+  exit 0
+fi
 cat <<EOF
 This project has a talpi run on disk (run_status: ${status:-unknown}).
 Use the talpiresume skill to read .talpi/ state and continue from the
