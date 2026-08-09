@@ -23,6 +23,13 @@ reflect (a phase advance, a halt, a resume-after-ratify or
 resume-after-reject). If they disagree, the journal wins — rewrite
 `state.md` to match it, then route off the corrected value.
 
+The same precedence applies to `handoff.md`: it carries run state and
+context — what's done, the concrete next step, gotchas — not
+procedure. Where handoff.md describes *how* the pipeline should
+proceed and that disagrees with the current skill text, the skill text
+wins: handoff.md may have been written under an older version of these
+skills.
+
 ## Fallback: no readable state.md
 
 If `.talpi/` exists but `state.md` is missing, or its `run_status` line

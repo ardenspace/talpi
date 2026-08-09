@@ -184,7 +184,11 @@ and keep going.
 ## Persistence discipline
 
 Rewrite `.talpi/handoff.md` at every phase boundary, and again whenever
-context runs low mid-phase — not just at the edges. State on disk is
+context runs low mid-phase — not just at the edges. handoff.md records
+state and context — the *what* and *where*, never the *how*: do not
+restate pipeline procedure in it, because skills change between
+versions and a copied procedure goes stale; the how always lives in
+the current skill text. State on disk is
 the only truth talpirun relies on: `handoff.md` plus `state.md` plus
 `conventions.md` — with plan.md's step checkboxes and the one-commit-
 per-step log recording exactly which steps have landed — must be enough

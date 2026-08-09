@@ -58,7 +58,12 @@ grep -q 'bouncing back' "$R" && ok || fail "talpirun: guard missing the halt-rul
 grep -q 'tripwire' "$R" && ok || fail "talpirun: no mechanical tripwire before step commits"
 grep -q 'Prior work this phase' "$R" && ok || fail "talpirun: no Prior-work-this-phase carry block"
 
-# 9) The hook injects guidance; it cannot invoke a skill. Prose must
+# 9) handoff.md is state/context, never procedure: stale copies from an
+#    older skill version must not shadow the current skill text.
+grep -q 'skill text wins' "$ROOT/skills/talpiresume/SKILL.md" && ok || fail "talpiresume: no skill-text-over-handoff precedence rule"
+grep -q 'never the \*how\*' "$R" && ok || fail "talpirun: handoff.md not restricted to state/context"
+
+# 10) The hook injects guidance; it cannot invoke a skill. Prose must
 #    not overclaim "automatic" routing.
 hits="$(grep -rniE 'routes? automatically' "$ROOT/skills" "$ROOT/README.md" 2>/dev/null)" || true
 [ -z "${hits:-}" ] && ok || fail "\"routes automatically\" overclaim:
