@@ -47,6 +47,12 @@ rewrite `state.md` in full (all four keys) before routing:
 
 ## Routing
 
+A `current_phase` past `phases_total` (e.g. `4` of `3`) is not a
+contradiction — the last phase's report advances the counter past the
+total (talpirun's convention), so it just means every phase has
+reported. Read the run's position from `run_status` and the journal,
+not from comparing the two counters.
+
 Read `.talpi/state.md`'s `run_status` and route:
 
 - **`speccing`** — hand off to the talpispec skill.
