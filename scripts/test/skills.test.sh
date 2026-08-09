@@ -60,7 +60,7 @@ grep -q 'Prior work this phase' "$R" && ok || fail "talpirun: no Prior-work-this
 
 # 9) handoff.md is state/context, never procedure: stale copies from an
 #    older skill version must not shadow the current skill text.
-grep -q 'skill text wins' "$ROOT/skills/talpiresume/SKILL.md" && ok || fail "talpiresume: no skill-text-over-handoff precedence rule"
+tr '\n' ' ' < "$ROOT/skills/talpiresume/SKILL.md" | grep -q 'skill text wins' && ok || fail "talpiresume: no skill-text-over-handoff precedence rule"
 grep -q 'never the \*how\*' "$R" && ok || fail "talpirun: handoff.md not restricted to state/context"
 
 # 10) The hook injects guidance; it cannot invoke a skill. Prose must
