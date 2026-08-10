@@ -209,7 +209,10 @@ verification is clean or resolved:
 
 1. Run the **smoke run** — actually launch the product and walk the
    smoke scenario from `.talpi/spec.md`'s Product Picture, for real,
-   not as a test file. If the smoke run breaks, that is not a
+   not as a test file. (On a refactor run — spec.md's second line is
+   `mode: refactor` — the smoke scenario is the spec's behavior walk:
+   the same end-to-end paths, behaving identically to what the spec
+   recorded before the run.) If the smoke run breaks, that is not a
    completion blocker to escalate — it reopens the phase loop: treat
    the break as a step, dispatch a fresh implementer subagent to fix
    it, and re-run the smoke scenario before attempting completion

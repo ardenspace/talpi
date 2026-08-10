@@ -23,6 +23,13 @@ contracts. Your job is what none of them could see:
    residue, and convention drift (the same concept implemented two ways
    by different phases where conventions.md demands one).
 
+If the second line of .talpi/spec.md is `mode: refactor`, this is a
+behavior-preserving refactor run: in your spec sweep, walk the spec's
+behavior walk against the final code — every path must behave exactly
+as the spec records it behaving before the run — and treat any diff
+outside the spec's stated scope as a finding even when the change
+itself is an improvement.
+
 Do NOT re-litigate internals that phase verifiers passed: style,
 structure, and taste beyond what conventions.md states are licensed to
 be imperfect — they only need to remain refactorable.

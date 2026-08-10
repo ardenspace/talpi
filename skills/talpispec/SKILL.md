@@ -20,6 +20,12 @@ spec already exists and route to talpiplan (if no plan yet) or talpirun
 `status: draft`, resume Act 2 or the panel from where the draft left off
 rather than starting over.
 
+One routing check before Act 1: if the ask is restructuring code that
+already works — a refactor of an existing codebase, not a product to
+build — route to the talpirefactor skill instead; it produces the same
+spec artifacts through a codebase recon rather than a product
+conversation.
+
 ## Act 1 — Product Conversation
 
 Start from "what do you want to build?" and stay entirely in the user's

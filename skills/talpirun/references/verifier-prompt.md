@@ -20,6 +20,17 @@ Check exactly three things:
    copy-pasted where a shared utility exists or should, values hardcoded
    that the design tokens own.
 
+If the second line of .talpi/spec.md is `mode: refactor`, this is a
+behavior-preserving refactor run — check three more things:
+4. Behavior preservation — any observable behavior change is a finding
+   unless the spec names it; the standing and characterization
+   contracts must still pin what they pinned before.
+5. Mined-convention adherence — conventions.md was mined from this
+   codebase; a new pattern imported where a mined one exists is a
+   finding, however idiomatic it looks elsewhere.
+6. Scope discipline — diff outside the spec's stated hotspot scope is
+   a finding, however good the change looks.
+
 Do NOT review internal style, structure, or taste beyond what
 conventions.md states — internals are licensed to be imperfect; they
 only need to remain refactorable.

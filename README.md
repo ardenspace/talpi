@@ -44,7 +44,10 @@ Full rationale and design record:
 `talpispec` turns a product idea into an approved spec: a freeform
 product conversation first, then a four-lens design interview (scope,
 boundary, reversibility, conventions), then a fresh-session review
-panel. `talpiplan` decomposes the approved spec into phases and drafts
+panel. For an existing codebase, `talpirefactor` is the alternate
+entry point: the same spec artifacts, produced by interviewing the
+code itself — mined conventions, current behavior pinned as the
+boundary contracts — for a behavior-preserving refactor run. `talpiplan` decomposes the approved spec into phases and drafts
 `.talpi/conventions.md` — the last mandatory human gate before the build
 runs unattended. `talpirun` is the autonomous core: at the start of each
 phase it pins that phase's boundary contracts as failing tests, then
@@ -69,6 +72,7 @@ right point.
 | Skill | What it does |
 |---|---|
 | `talpispec` | Turns a product idea into an approved `.talpi/spec.md` through a two-act conversation (freeform product talk, then a four-lens design interview) and a fresh-session review panel. |
+| `talpirefactor` | Brownfield twin of talpispec: a short intent conversation, then a three-angle codebase recon (mined conventions, pinned/unpinned behavior, hotspots) that becomes a behavior-preserving refactor spec (`mode: refactor`) — same panel, same approval, same pipeline downstream. |
 | `talpiplan` | Decomposes the approved spec into phases and drafts `.talpi/conventions.md` — the last mandatory human gate before the build runs autonomously. |
 | `talpirun` | Executes the plan phase by phase: pins boundary contracts as tests first, dispatches fresh implementer subagents per step (one commit per step), verifies each phase with one fresh-session reviewer, and reports non-blocking. |
 | `talpiresume` | Reads `.talpi/` state off disk and routes a fresh session back into the pipeline at the right point — after a compact, a crash, or a restart. |
@@ -91,15 +95,17 @@ Full field-by-field format: [`docs/state-format.md`](docs/state-format.md).
 
 Run these inside Claude Code. Restart Claude Code to load the plugin.
 Then, in your project, invoke the `talpispec` skill to start the
-pipeline.
+pipeline (`talpirefactor` when the project is an existing codebase to
+restructure).
 
 ## Status
 
 v1 ships the 0→1 MVP pipeline described above — spec, plan, build,
-verify, done — as a Claude Code plugin: four skills plus the `.talpi/`
-state conventions they share. Feature-addition and refactoring workflows
-are v2, and the plan is to design and build them *with* talpi itself,
-dogfooding the same pipeline shipped here.
+verify, done — as a Claude Code plugin, plus `talpirefactor` as the
+brownfield entry point for behavior-preserving refactor runs.
+Feature-addition workflows on shipped projects are v2, and the plan is
+to design and build them *with* talpi itself, dogfooding the same
+pipeline shipped here.
 
 ## License
 

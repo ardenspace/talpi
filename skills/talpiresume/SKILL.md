@@ -62,7 +62,9 @@ not from comparing the two counters.
 
 Read `.talpi/state.md`'s `run_status` and route:
 
-- **`speccing`** — hand off to the talpispec skill.
+- **`speccing`** — hand off to the talpispec skill (talpirefactor if
+  `.talpi/spec.md`'s second line is `mode: refactor` — its draft
+  resumes there).
 - **`planning`** — hand off to the talpiplan skill.
 - **`building`** — hand off to the talpirun skill, re-entering at
   `current_phase`. Before handing off, read `.talpi/handoff.md`,
@@ -90,7 +92,8 @@ Read `.talpi/state.md`'s `run_status` and route:
   resume are talpirun's job, not talpiresume's.
 
 If `.talpi/` does not exist at all, there is no run to resume — report
-that and suggest starting with talpispec instead.
+that and suggest starting with talpispec (or talpirefactor, for
+restructuring an existing codebase) instead.
 
 ## Status Questions
 

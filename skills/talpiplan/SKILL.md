@@ -15,7 +15,7 @@ until a phase report or a halt brings the human back in.
 Before starting, check `.talpi/spec.md`. If it does not exist, or its
 first line is not `status: approved`, do not start planning — report
 that no approved spec exists yet and route to the talpispec skill
-instead.
+(or talpirefactor, for restructuring an existing codebase) instead.
 
 If `.talpi/plan.md` exists and its first line is `status: approved`, do
 not start a new planning conversation — report that a plan already
