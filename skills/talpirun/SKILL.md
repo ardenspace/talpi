@@ -1,6 +1,6 @@
 ---
 name: talpirun
-description: Use when a talpi plan is approved and the build should start or continue. Autonomous per phase - pin boundary contracts as tests first, implement freely inside them, one fresh verifier per phase, non-blocking reports to the human.
+description: Use when a talpi plan is approved and the build should start or continue. Autonomous per phase - pin boundary contracts as tests first, implement freely inside them, one fresh verifier per phase, non-blocking reports to the human, one whole-run fresh-eyes review before final acceptance.
 ---
 
 # talpirun
@@ -37,7 +37,12 @@ is over (the last phase's report advanced the counter); then check
 a phase. If the journal's tail is `run done`, the run is genuinely
 finished — report that. If the tail is `phase <phases_total> reported`
 with nothing later, the phase loop finished but completion never ran —
-go straight to Completion. If the tail is `final report sent, awaiting
+go straight to Completion. If the tail is a `run review (through
+<hash>)` line with nothing later, completion was interrupted between
+the run review and the final report — re-enter Completion from step 1
+(the smoke run and the review are idempotent, and the review's diff
+range narrows to commits after `<hash>`, so the redo is cheap). If the
+tail is `final report sent, awaiting
 acceptance` with nothing later, completion already ran and is waiting
 on the human — remind them the final report is pending their
 acceptance and wait; do not rebuild or re-send the report. If instead
@@ -209,15 +214,41 @@ verification is clean or resolved:
    the break as a step, dispatch a fresh implementer subagent to fix
    it, and re-run the smoke scenario before attempting completion
    again.
-2. Send the final report asking the human for acceptance. Human
+2. Run the **run review** — dispatch exactly one fresh-context
+   reviewer, no conversation history, using
+   `references/run-reviewer-prompt.md`. Phase verifiers each saw only
+   their own phase's contracts; this is the one look at what sits
+   *between* them — contract interactions, the spec swept end to end,
+   and leftovers no phase owned. The diff range is
+   `<run base>..HEAD`, where `<run base>` is the hash in the journal's
+   `phase 1 started (base: <hash>)` line; on a repeat completion
+   (reopened by rejection or a review fix), narrow it to
+   `<last reviewed hash>..HEAD` from the most recent
+   `run review (through <hash>)` journal line — earlier commits were
+   already reviewed. Findings route by tag:
+   - `[FIX]` (objective bug or spec violation): same machinery as a
+     smoke-run break — one fresh implementer subagent per finding,
+     re-run the test suite, commit as
+     `talpi: run review fix: <short summary>`. Never fixed inline.
+   - `[NOTE]` (judgment call, cleanup): do not fix — carry every one
+     verbatim into the final report for the human to rule on at
+     acceptance.
+   - `[ESCALATE]`: treat like a phase-end escalation — blocking (the
+     halt path) iff it alters a Reversibility Ledger Decided entry,
+     otherwise a question in the final report.
+   Journal `run review (through <hash>): <n> findings (<f> fixed,
+   <k> noted)` — `<hash>` is the HEAD the reviewer saw — or
+   `run review (through <hash>): clean`.
+3. Send the final report asking the human for acceptance, with the
+   run review's `[NOTE]` findings listed for their ruling. Human
    acceptance is the final gate — completion is not done until they
    say so.
-3. Journal `final report sent, awaiting acceptance`. Leave
+4. Journal `final report sent, awaiting acceptance`. Leave
    `.talpi/state.md`'s `run_status` at `building` — the run is not
    `done` yet — and rewrite `.talpi/handoff.md` so a fresh session
    landing here knows the build is finished and is waiting on the
    human's acceptance, not mid-phase work.
-4. Wait for the human's response, same as any other stop-report: the
+5. Wait for the human's response, same as any other stop-report: the
    run does not send further reports on its own from here.
 
 **On acceptance:** rewrite `.talpi/state.md` in full, all four keys:
