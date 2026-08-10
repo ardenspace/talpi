@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.2 — 2026-08-10
+- Completion gains a **run review** stage between the smoke run and
+  the final report: one fresh-context reviewer over the whole run's
+  diff, checking what per-phase verifiers structurally cannot see —
+  contract interactions, an end-to-end spec sweep, and leftovers no
+  phase owned (unused deps, dead files, convention drift). `[FIX]`
+  findings reuse the smoke-break fix machinery; `[NOTE]` findings are
+  carried into the final report for the human's acceptance ruling;
+  `[ESCALATE]` follows the existing Decided-list halt rules. Repeat
+  completions narrow the review to commits after the last reviewed
+  hash, and the guard understands the new
+  `run review (through <hash>)` journal tail.
+
 ## 0.2.1 — 2026-08-09
 - Acceptance rejection now appends a synthetic `Acceptance fixes`
   phase to plan.md (steps get checkboxes, a journaled base hash, and
