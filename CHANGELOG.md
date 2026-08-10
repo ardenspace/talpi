@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.0 — 2026-08-10
+- New skill **`talpirefactor`** — brownfield entry point for
+  behavior-preserving refactor runs. A short intent conversation
+  (itch, target shape, must-not-change seed), then a three-angle
+  codebase recon by fresh subagents (mined conventions with
+  contradictions, pinned/unpinned observable behavior, hotspot map
+  with a minimal-change route), synthesized into the standard spec
+  template with `mode: refactor` on line 2. Existing tests become
+  standing contracts; unpinned behaviors get characterization
+  contracts pinned first by talpirun's normal phase discipline. Panel
+  review, approval, talpiplan, and talpirun are reused unchanged.
+- Refactor-aware prompts: the phase verifier gains three brownfield
+  checks (behavior preservation, mined-convention adherence, scope
+  discipline) and the run reviewer walks the spec's behavior walk;
+  talpirun's smoke run reads the behavior walk as the smoke scenario
+  on `mode: refactor` runs.
+- Routing: talpispec, talpiplan, and talpiresume know when to point at
+  talpirefactor; a refactor run over a `done` run archives the old
+  spec/plan to `.talpi/archive/<date>/` and keeps journal.md
+  appending.
+
 ## 0.2.2 — 2026-08-10
 - Completion gains a **run review** stage between the smoke run and
   the final report: one fresh-context reviewer over the whole run's
