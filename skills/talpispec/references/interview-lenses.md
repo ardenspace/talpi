@@ -29,6 +29,19 @@ Conventions. One at a time, skip answered, follow the thread.
   ledger so delegation is explicit, and it stays out of the spec.
 
 ## Conventions Lens
+Open by proposing the baseline — three domain-neutral form rules that
+apply unless the human adjusts or strikes them, here and now:
+- Repeated literals (colors, spacing, paths, magic numbers) live in one
+  named home — design tokens or a constants module — never inlined in
+  two places.
+- Logic appearing a second time is extracted into the shared layer and
+  registered in conventions.md.
+- User-visible failure wording follows one tone, defined in one place.
+
+Whatever survives becomes the Baseline section of `.talpi/conventions.md`
+(drafted later by talpiplan). These are form rules, not solutions — they
+say where values and shared logic live, never how to implement anything.
+Then refine with:
 - Is there a design theme — tokens, colors, spacing — that everything
   should draw from?
 - What kinds of logic should always be extracted into shared utilities?

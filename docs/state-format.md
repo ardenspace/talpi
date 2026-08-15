@@ -52,6 +52,7 @@ Drafted by the `talpiplan` skill and maintained by the `talpirun` skill as a liv
 Sections:
 
 - `# Conventions` — the document title
+- `## Baseline (applies unless overridden)` — domain-neutral form rules proposed at the spec interview's Conventions lens (no repeated inline literals, extract shared logic on second occurrence, one failure-wording tone); whatever the human accepted survives here and is citable by the verifier
 - `## Design Tokens` — colors, typography, spacing, and other visual constants used across the project
 - `## Shared Utilities` — functions, components, or modules that are available for reuse; implementers register new utilities here as they create them
 - `## Layout & Naming` — file organization, naming conventions, and module structure

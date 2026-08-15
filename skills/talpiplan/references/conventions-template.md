@@ -1,5 +1,16 @@
 # Conventions
 
+## Baseline (applies unless overridden)
+<!-- Domain-neutral floor, proposed at the spec interview's Conventions
+     lens. Keep what the human accepted; drop what they struck. The
+     phase-end verifier cites these lines like any other rule. -->
+- Repeated literals (colors, spacing, paths, magic numbers) live in one
+  named home — design tokens or a constants module — never inlined in
+  two places.
+- Logic appearing a second time is extracted into the shared layer and
+  registered under Shared Utilities below.
+- User-visible failure wording follows one tone, defined in one place.
+
 ## Design Tokens
 <!-- Colors, typography, spacing, and other visual constants used
      across the project. If the project has no visual surface, say so
