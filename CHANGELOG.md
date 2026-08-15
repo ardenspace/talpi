@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 — 2026-08-16
+- Conventions get a **baseline floor**: the Conventions lens now opens
+  by proposing three domain-neutral form rules (repeated literals live
+  in one named home; logic appearing twice is extracted and registered;
+  one failure-wording tone), which the human can adjust or strike.
+  Whatever survives lands in a new `## Baseline` section of
+  `.talpi/conventions.md` — so the phase-end verifier always has
+  concrete lines to cite against hardcoding and duplication, even when
+  the human answers the lens thinly. Form rules only, never solutions;
+  internals stay the agent's.
+
 ## 0.3.0 — 2026-08-10
 - New skill **`talpirefactor`** — brownfield entry point for
   behavior-preserving refactor runs. A short intent conversation
