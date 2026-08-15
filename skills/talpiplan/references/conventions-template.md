@@ -3,7 +3,9 @@
 ## Baseline (applies unless overridden)
 <!-- Domain-neutral floor, proposed at the spec interview's Conventions
      lens. Keep what the human accepted; drop what they struck. The
-     phase-end verifier cites these lines like any other rule. -->
+     phase-end verifier cites these lines like any other rule.
+     Simplicity zones named in the spec override this baseline where
+     they apply — licensed hardcoding is not a finding. -->
 - Repeated literals (colors, spacing, paths, magic numbers) live in one
   named home — design tokens or a constants module — never inlined in
   two places.
