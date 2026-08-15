@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 — 2026-08-16
+- Baseline precedence made explicit: simplicity zones named in the
+  spec override the conventions baseline where they apply — licensed
+  hardcoding is never a verifier finding.
+- Test fix: skills.test.sh now resolves cross-skill
+  `../<skill>/references/*.md` mentions (introduced by talpirefactor
+  in 0.3.0) instead of flagging them as missing local files.
+
 ## 0.3.1 — 2026-08-16
 - Conventions get a **baseline floor**: the Conventions lens now opens
   by proposing three domain-neutral form rules (repeated literals live
