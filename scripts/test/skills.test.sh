@@ -25,7 +25,9 @@ for dir in "$ROOT"/skills/*/; do
     done
   fi
   # 3) ...and every references/*.md mention resolves to a real file.
-  for rn in $(grep -oE 'references/[a-z-]+\.md' "$s" | sort -u); do
+  #    Cross-skill mentions are written `../<skill>/references/*.md` and
+  #    resolve from this skill's directory like any other.
+  for rn in $(grep -oE '(\.\./[a-z-]+/)?references/[a-z-]+\.md' "$s" | sort -u); do
     [ -f "$dir/$rn" ] && ok || fail "$base: SKILL.md mentions missing $rn"
   done
 done
