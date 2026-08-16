@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.3 — 2026-08-16
+- Per-step overhead cuts, from dogfooding a live run:
+  - The step tripwire prefers typecheck or build, falls back to the
+    test command only when nothing cheaper exists, and never re-runs
+    a full suite the implementer already ran — correctness stays
+    phase-end verification's job.
+  - talpiplan gains a third self-check on step granularity: a step
+    whose real work is a minute or two merges into a cohesive
+    adjacent step; unrelated chores stay separate, since
+    one-step-one-commit is also the recovery granularity.
+  - talpirun's dispatch context (conventions, the phase's contracts,
+    the step description) is explicitly inlined in the subagent
+    prompt rather than passed as paths, sparing each fresh subagent
+    its discovery tool calls.
+
 ## 0.3.2 — 2026-08-16
 - Baseline precedence made explicit: simplicity zones named in the
   spec override the conventions baseline where they apply — licensed
