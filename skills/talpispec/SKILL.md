@@ -90,8 +90,8 @@ separately, one prompt each. Either way every reviewer starts with no
 conversation history, only the spec file path. This matters: a
 reviewer that shares your context will share your blind spots.
 
-Collect findings from all three. Each finding is `[BLOCKING]` or
-`[NOTE]`:
+Collect findings from all three lenses. Each finding is `[BLOCKING]`
+or `[NOTE]`:
 
 - `[BLOCKING]` findings go back into the interview. Re-open the relevant
   lens with the human, resolve the finding, update the spec, and re-run
@@ -119,13 +119,25 @@ thin-surface panel. If any `[BLOCKING]` survives the cap, do not keep
 looping: present each surviving finding to the human to either fix
 (one final targeted edit, no further panel) or overrule.
 
-**Upgrade valve.** If a thin-surface reviewer's findings contradict
-the thin classification itself — an unlisted touchpoint carrying
-secrets or personal data, a decision of the schema/auth/data-ownership
-kind missing from the Reversibility Ledger — then the classification
-was wrong, not just the spec. The re-run is the full three-reviewer
-panel (still a re-run: the adjudicated-list scoping above applies),
-and the re-run cap resets to two.
+**Discarding a thin classification.** The thin classification is
+discarded when either a thin-surface reviewer's findings contradict
+it — an unlisted touchpoint carrying secrets or personal data, a
+decision of the schema/auth/data-ownership kind missing from the
+Reversibility Ledger — or the human asks for the full panel at
+approval. Either way the classification was wrong, not just the
+spec: the spec re-enters the thick path at its start and owes what a
+thick spec pays — one unscoped run of the full three-reviewer panel,
+then the normal scoped re-runs capped at two. Sequencing differs by
+trigger: a contradicting finding is first resolved through the
+normal loop, and the unscoped panel then reads the updated spec; a
+human request re-enters immediately, there being nothing to resolve.
+Adjudicated findings stay adjudicated, but enforce that at
+collection, not in the prompts: the unscoped panel's reviewers never
+see the adjudication list — handing it to them would smuggle scoping
+back in — and any re-raised adjudicated item is resolved at
+collection by citing the ledger's record. A thin classification can
+be discarded only once — from then on the run is on the thick path,
+whose convergence this inherits.
 
 **Human overrule.** The human may overrule any `[BLOCKING]` finding.
 Record each overruled finding in the spec's Reversibility Ledger
@@ -158,8 +170,9 @@ Present the spec to the human (including any open `[NOTE]` findings) and
 ask them to approve it. Name the panel shape that reviewed it — on a
 thin-surface run, say in one line that the three lenses ran as a
 single reviewer and that the human can ask for the full three-reviewer
-panel before approving. Do not proceed on silence or an ambiguous
-response — wait for an explicit approval.
+panel before approving; such a request discards the thin
+classification (see Panel Review). Do not proceed on silence or an
+ambiguous response — wait for an explicit approval.
 
 On approval:
 
