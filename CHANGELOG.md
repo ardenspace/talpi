@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.4 — 2026-08-16
+- Three decisions from the practice-3d dogfood run
+  (docs/plans/2026-08-16-dogfood-feedback-practice-3d.md):
+  - **Size pressure inside delegated zones**: the conventions baseline
+    gains a fourth rule — a file growing past ~300 lines triggers a
+    split review; staying single-file is legitimate when recorded in
+    one line under Layout & Naming. A review trigger, not a hard
+    limit; the phase-end verifier covers it through the existing
+    conventions check, no prompt change.
+  - **Eye-verified zones get an explicit deliverable**: when a phase
+    builds or reshapes a surface the spec leaves to eye verification,
+    talpirun appends concrete check items to `.talpi/manual-check.md`
+    before the phase report, and final acceptance is asked *with* the
+    checklist — the human walking it is that zone's verification
+    story. Ratifies behavior a live run invented on its own.
+  - **Panel shape proportional to spec surface**: talpispec reads the
+    panel's shape off the draft — a thin surface (few contracts, no
+    schema/auth/data-ownership ledger material, no secrets/PII/
+    multi-user) runs the three lenses as one fresh reviewer with a
+    re-run cap of one. Discarding the thin classification — by a
+    contradicting finding or by the human asking for the full panel
+    at approval — re-enters the thick path at its start: one unscoped
+    three-reviewer run (adjudicated findings preserved at collection
+    against the ledger, never via the prompts), then scoped re-runs
+    capped at two; discard happens at most once.
+
 ## 0.3.3 — 2026-08-16
 - Per-step overhead cuts, from dogfooding a live run:
   - The step tripwire prefers typecheck or build, falls back to the
