@@ -58,6 +58,16 @@ later phase's step as "finish/verify X against its contract" rather
 than "implement X", so a step that finds the work already landed is a
 conformance check, not a surprise no-op.
 
+Third self-check — step granularity: every `- [ ]` step buys a full
+fresh-subagent bootstrap (context reading, the mechanical check, the
+commit), so a step whose real work is a minute or two of typing is
+mostly overhead. Merge such a step into an adjacent step that touches
+the same surface. The merge criterion is cohesion, not mere brevity —
+the combined step must still read as one coherent unit of work making
+one coherent commit; unrelated small chores stay separate steps even
+though each is small, because one-step-one-commit is also the run's
+recovery and rollback granularity.
+
 ## Conventions Draft
 
 Write `.talpi/conventions.md` from `references/conventions-template.md`.

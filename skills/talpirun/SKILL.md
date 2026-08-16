@@ -63,7 +63,12 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    no conversation history; it receives `.talpi/conventions.md`, the
    phase's contracts (the `B<n>` shapes from spec.md that the phase's
    `Contracts:` line names), and its own step description from
-   plan.md, and nothing else. This keeps the orchestrator's own context
+   plan.md, and nothing else — all three inlined in the dispatch
+   prompt, not passed as paths for the subagent to go read. Inlining
+   is safe because the orchestrator is conventions.md's only writer
+   during a run and the contracts froze at spec approval, so the
+   inlined copies cannot be stale — and it spares each subagent the
+   discovery tool calls. This keeps the orchestrator's own context
    lean for long runs, and forces disk state — not conversation memory
    — to be the real continuity mechanism on every single step.
    Journal `phase <n> started (base: <hash>)` when the phase's first
@@ -103,10 +108,15 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
 
 4. **One step, one commit.** When a step's subagent returns and its
    work is accepted — acceptance is mechanical, not a review: run the
-   cheapest check the project offers (build, typecheck, or the test
-   command if one exists) so no step lands a commit that breaks
-   compilation or leaves the suite unrunnable; a tripwire, not a
-   verification ceremony. If the step touched code but no such check
+   cheapest check the project offers, preferring typecheck or build;
+   fall back to the test command only when it is the only mechanical
+   check the project has. The point is that no step lands a commit
+   that breaks compilation or leaves the suite unrunnable — a
+   tripwire, not a verification ceremony. Never re-run a full test
+   suite the implementer already ran and reported: correctness is
+   phase-end verification's job, and the phase's contract tests get
+   their green check at the phase boundary, not on every step. If the
+   step touched code but no such check
    can run, journal `phase <n> step <k>: no mechanical check:
    <reason>` and proceed — the orchestrator marks that step's checkbox
    `- [x]` in `.talpi/plan.md` and commits the step's work — the code,
