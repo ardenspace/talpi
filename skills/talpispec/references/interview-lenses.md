@@ -29,7 +29,7 @@ Conventions. One at a time, skip answered, follow the thread.
   ledger so delegation is explicit, and it stays out of the spec.
 
 ## Conventions Lens
-Open by proposing the baseline — three domain-neutral form rules that
+Open by proposing the baseline — four domain-neutral form rules that
 apply unless the human adjusts or strikes them, here and now:
 - Repeated literals (colors, spacing, paths, magic numbers) live in one
   named home — design tokens or a constants module — never inlined in
@@ -37,6 +37,9 @@ apply unless the human adjusts or strikes them, here and now:
 - Logic appearing a second time is extracted into the shared layer and
   registered in conventions.md.
 - User-visible failure wording follows one tone, defined in one place.
+- A file growing past ~300 lines triggers a split review — staying
+  single-file is a legitimate outcome if the reason is recorded in
+  conventions.md; a review trigger, not a hard limit.
 
 Whatever survives becomes the Baseline section of `.talpi/conventions.md`
 (drafted later by talpiplan). These are form rules, not solutions — they

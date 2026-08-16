@@ -159,6 +159,14 @@ findings are resolved.
 
 ## Phase report
 
+Before filling the report: if this phase built or reshaped a surface
+the spec's simplicity zones leave to eye verification, append concrete
+check items for it to `.talpi/manual-check.md` — derived from the smoke
+scenario and the phase's work, specific enough to walk without reading
+the code (what to open, what to do, what should be seen). The report's
+Manual-check line points at the file; the final acceptance walks it. A
+project with no eye-verified zones never creates the file.
+
 Fill `references/phase-report-template.md` for the phase and deliver it
 to the human through the session's available channel. Journal
 `phase <n> reported`, update `.talpi/state.md` (`current_phase` advanced
@@ -253,7 +261,10 @@ verification is clean or resolved:
    <k> noted)` — `<hash>` is the HEAD the reviewer saw — or
    `run review (through <hash>): clean`.
 3. Send the final report asking the human for acceptance, with the
-   run review's `[NOTE]` findings listed for their ruling. Human
+   run review's `[NOTE]` findings listed for their ruling. If
+   `.talpi/manual-check.md` exists, hand it over here: the eye-verified
+   zones' verification story is the human walking that checklist, so
+   acceptance is asked *with* it, not before it. Human
    acceptance is the final gate — completion is not done until they
    say so.
 4. Journal `final report sent, awaiting acceptance`. Leave

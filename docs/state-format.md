@@ -146,6 +146,29 @@ Implement the user-auth controller in Phase 2. Start with the login endpoint as 
 
 ---
 
+## .talpi/manual-check.md
+
+The human's eye-verification checklist, for projects whose spec names simplicity zones that leave a surface to eye verification. A project with no eye-verified zones never creates this file.
+
+Created and appended by `talpirun` at each phase report whose phase built or reshaped an eye-verified surface: concrete check items derived from the smoke scenario and the phase's work, specific enough to walk without reading the code — what to open, what to do, what should be seen. The phase report's `Manual check:` line records how many items the phase added.
+
+At completion, the final report hands the file to the human: walking it is the verification story for the eye-verified zones, so acceptance is asked *with* it, not before it. The file is for the human's eyes and hands — no agent walks or checks off its items.
+
+Example:
+
+```markdown
+## Phase 2: bubble scene
+
+- Open `/` in a real browser (not headless). Bubbles drift over the
+  backdrop; motion is smooth, no stutter.
+- Hover a work bubble: it pauses and enlarges, and the work's objet
+  fades in on its surface.
+- Click a work bubble: it pops with a particle burst, then the work
+  page opens.
+```
+
+---
+
 ## Running State Lifecycle
 
 A typical talpi run progresses:

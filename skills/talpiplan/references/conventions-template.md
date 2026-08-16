@@ -12,6 +12,11 @@
 - Logic appearing a second time is extracted into the shared layer and
   registered under Shared Utilities below.
 - User-visible failure wording follows one tone, defined in one place.
+- A file growing past ~300 lines triggers a split review: look for
+  separable concerns (components, pure helpers, shader/template
+  sources). Staying single-file is a legitimate outcome — record why
+  in one line under Layout & Naming; a recorded exception is not a
+  finding. This is a review trigger, not a hard limit.
 
 ## Design Tokens
 <!-- Colors, typography, spacing, and other visual constants used
