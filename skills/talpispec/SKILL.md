@@ -72,12 +72,23 @@ lens, "Delegated" list).
 ## Panel Review
 
 Once Act 2 is complete, write the draft to `.talpi/spec.md` (see
-Approval below for the exact procedure) and dispatch the three reviewers
-in `references/panel-reviewers.md`: the adversarial reviewer, the
-boundary-completeness reviewer, and the reversibility auditor. Each
-reviewer runs in a fresh context — no conversation history, only the
-spec file path. This matters: a reviewer that shares your context will
-share your blind spots.
+Approval below for the exact procedure), then read the panel's shape
+off the draft's own surface. The surface is *thin* when all of these
+hold: only a handful of boundary contracts (around three or fewer);
+no Reversibility Ledger entries or candidates of the schema, auth, or
+data-ownership kind; and no secrets, personal data, or multi-user
+concerns anywhere in the Boundary lens's answers. The binary absences
+carry the judgment — the contract count is a signal, not a cutoff.
+The same criteria that make a surface thin are what make a missed
+finding cheap, so thinning the panel is licensed by the spec itself.
+
+On a thin surface, dispatch one reviewer carrying all three prompts
+from `references/panel-reviewers.md` — adversarial,
+boundary-completeness, reversibility auditor — worked in that order
+in a single fresh context. Otherwise dispatch the three reviewers
+separately, one prompt each. Either way every reviewer starts with no
+conversation history, only the spec file path. This matters: a
+reviewer that shares your context will share your blind spots.
 
 Collect findings from all three. Each finding is `[BLOCKING]` or
 `[NOTE]`:
@@ -103,10 +114,18 @@ already adjudicated (fixed or overruled) and instruct reviewers:
 `[BLOCKING]` is reserved for problems *introduced by the latest spec
 changes* and for previously-`[BLOCKING]` items still unresolved;
 anything else — including disagreement with an already-adjudicated
-resolution — is at most `[NOTE]`. Cap re-runs at two. If any
-`[BLOCKING]` survives the cap, do not keep looping: present each
-surviving finding to the human to either fix (one final targeted edit,
-no further panel) or overrule.
+resolution — is at most `[NOTE]`. Cap re-runs at two — at one on a
+thin-surface panel. If any `[BLOCKING]` survives the cap, do not keep
+looping: present each surviving finding to the human to either fix
+(one final targeted edit, no further panel) or overrule.
+
+**Upgrade valve.** If a thin-surface reviewer's findings contradict
+the thin classification itself — an unlisted touchpoint carrying
+secrets or personal data, a decision of the schema/auth/data-ownership
+kind missing from the Reversibility Ledger — then the classification
+was wrong, not just the spec. The re-run is the full three-reviewer
+panel (still a re-run: the adjudicated-list scoping above applies),
+and the re-run cap resets to two.
 
 **Human overrule.** The human may overrule any `[BLOCKING]` finding.
 Record each overruled finding in the spec's Reversibility Ledger
@@ -136,7 +155,10 @@ updated: <ISO date>
 ```
 
 Present the spec to the human (including any open `[NOTE]` findings) and
-ask them to approve it. Do not proceed on silence or an ambiguous
+ask them to approve it. Name the panel shape that reviewed it — on a
+thin-surface run, say in one line that the three lenses ran as a
+single reviewer and that the human can ask for the full three-reviewer
+panel before approving. Do not proceed on silence or an ambiguous
 response — wait for an explicit approval.
 
 On approval:
