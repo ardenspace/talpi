@@ -38,7 +38,10 @@ Full rationale and design record:
            Fix what's fixable; escalate the rest. Reports are
            non-blocking — except violations of Decided (hard-to-change)
            decisions, which halt the run for the human.
-5. DONE    All contract tests green + smoke run + human acceptance.
+5. DONE    All contract tests green + smoke run + whole-run review +
+           human acceptance. On acceptance the run distills what it
+           learned into .talpi/knowledge.md for the next run — gated
+           so only knowledge that cannot lie survives.
 ```
 
 `talpispec` turns a product idea into an approved spec: a freeform
@@ -80,11 +83,25 @@ right point.
 ## State
 
 All cross-session state lives in `.talpi/` at the project root — spec,
-plan, conventions, state, journal, and handoff, all plain Markdown, all
-meant to be committed to version control. The design assumption behind this is
+plan, conventions, state, journal, handoff, and knowledge, all plain
+Markdown, all meant to be committed to version control. The design
+assumption behind this is
 that any session can die at any moment, so the files on disk — not the
 conversation — are the single source of truth for where a run stands.
 Full field-by-field format: [`docs/state-format.md`](docs/state-format.md).
+
+Two files survive across runs: `journal.md` and `knowledge.md`.
+The journal is append-only as a mechanical guarantee — the journal
+script refuses to append when a committed line was edited or removed,
+because journal lines are the provenance store under the knowledge
+checks. `knowledge.md` is the distilled memory of past runs, written
+at completion behind a script gate that admits only knowledge that
+cannot lie: human decisions as verbatim quotes (string-checked against
+their source), facts as replayable commands (re-run at write time,
+dropped on failure), and everything interpretive only as open
+questions. Only the implementation lane of the next run reads it —
+verifiers, run reviewers, and spec panels stay blind, so an inherited
+blind spot cannot recruit the lane meant to catch it.
 
 ## Install
 
