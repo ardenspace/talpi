@@ -1,8 +1,8 @@
 # Knowledge Distillation (v0.5.0) — Implementation Plan
 
 Written: 2026-08-19, from a design conversation (three rounds of external-agent
-review, holes patched each round). Status: **approved design, implementation
-pending**.
+review, holes patched each round). Status: **implemented — shipped as 0.5.0
+(2026-08-19)**.
 
 ## Problem
 
@@ -113,5 +113,5 @@ human-only reopening).
   reads knowledge.md when present — Decisions as constraints, gate-passing
   Facts as re-mining skips, Questions as homework; origin-marking rule for
   knowledge-derived spec items; conventions.md stays this-run-only.
-- [ ] 6. CHANGELOG 0.5.0, version bump, full suite green, fixture smoke of the
+- [x] 6. CHANGELOG 0.5.0, version bump, full suite green, fixture smoke of the
   whole loop (distill → archive move → next-run check still passes).

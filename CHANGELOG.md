@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.5.0 — 2026-08-19
+- **Knowledge distillation: runs stop forgetting, without inheriting
+  lies.** New file `.talpi/knowledge.md` — with journal.md, the only
+  file that survives across runs (a new run's archive move leaves both
+  in place). Written by talpirun at completion, on acceptance, before
+  `run done`. The design rule: inherit only knowledge that cannot lie —
+  - `## Decisions` — verbatim quotes of human decisions (plus their
+    rationale), string-checked against the original; no paraphrase
+    survives. Provenance is content-addressed (spec.md,
+    archive/*/spec.md, journal.md), so entries survive a later run's
+    archive move; the `source:` field is a hint, never trusted.
+  - `## Verified facts` — replayable commands only (command + expected
+    output + `as of <hash>` + descriptive scope). An interpretation has
+    no command to replay, so it cannot enter this section.
+  - `## Open questions` — the only afterlife for interpretations and
+    negative knowledge; question form is mechanically enforced.
+- New script `scripts/talpi-knowledge.sh` — the trust gate: `check`
+  validates structure/grammar, resolves quotes content-addressed, and
+  flags facts whose scope changed since their hash (`stale — demote to
+  question`); `replay` re-runs every fact's command. talpirun runs both
+  at distillation and drops or demotes what fails — trust comes from
+  the gate, not the distiller.
+- **journal.md append-only is now mechanical**: talpi-journal.sh
+  refuses to append when the committed (HEAD) journal is not a
+  byte-prefix of the working copy, and talpi-status.sh surfaces the
+  same tampering as a `warning:` — journal lines are the provenance
+  store under every verbatim check.
+- **Lane isolation**: only the implementation lane (talpispec /
+  talpirefactor recon, implementers via the spec) reads knowledge.md.
+  Verifier and reviewer dispatches never receive it, knowledge is
+  never merged into conventions.md, and recon marks knowledge-derived
+  spec items `(from knowledge.md)` so inherited knowledge gains
+  execution authority only through the human spec gate. Recon reads by
+  type: Decisions as standing constraints, gate-passing facts as
+  re-mining skips, questions as homework.
+- All of it pinned by `scripts/test/knowledge.test.sh`: grammar and
+  provenance fixtures (including the archive move), the replay gate,
+  staleness demotion, journal tamper refusal on a git fixture, and
+  isolation greps over prompts and skill prose.
+
 ## 0.4.1 — 2026-08-19
 - **Session-start hook injects a position snapshot.** The hook now runs
   `talpi-status.sh` and includes its full output — run_status, phase
