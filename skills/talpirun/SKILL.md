@@ -73,6 +73,12 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    discovery tool calls. This keeps the orchestrator's own context
    lean for long runs, and forces disk state — not conversation memory
    — to be the real continuity mechanism on every single step.
+   Environment facts the run must respect — port assignments, services
+   that must not be killed, machine quirks from CLAUDE.md or the human
+   — are written into conventions.md once, when the run's first
+   dispatch is prepared, never repeated ad hoc in each dispatch prompt:
+   conventions.md is already inlined into every dispatch, so recording
+   them there is what makes the repetition unnecessary.
    Journal `phase <n> started (base: <hash>)` when the phase's first
    step is dispatched, where `<hash>` is the commit HEAD points at just
    before that step — the phase's diff range starts there. (Every
@@ -113,6 +119,18 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    > what touches a boundary contract or the Reversibility Ledger's
    > Decided list. Everything else is yours — the ledger's Delegated
    > list is your license.
+
+   One event outranks that rule: a **contract dispute**. If a pinned
+   contract itself looks wrong — it contradicts the spec's intent,
+   another contract, or what implementing revealed — the implementer
+   says so and stops; it never contorts internals until the test
+   passes. "The implementation violates the contract" is the
+   implementer's to fix; "the contract is wrong" is only ever the
+   human's. The orchestrator journals `phase <n> contract dispute:
+   <summary>` and halts through the blocking-escalation path under
+   Phase report, immediately, not at the phase boundary — a pinned
+   contract froze at spec approval, so amending or upholding it is the
+   same grade of event as a Decided-list change.
 
 4. **One step, one commit.** When a step's subagent returns and its
    work is accepted — acceptance is mechanical, not a review: run the
@@ -208,7 +226,11 @@ fresh-session verifier to re-check the revert, and only then resume the
 same way — `run_status` back to `building` in `.talpi/state.md`, and a
 journal entry noting the run resumed after reverting the decision. In
 both cases, `state.md` must never be left reading `halted` once the run
-is actually moving again. Every stop-report — halted or not — includes
+is actually moving again. A contract dispute (Phase loop step 3) halts
+through this same path with the ruling vocabulary aimed at the contract
+instead of code: ratify amends the contract test and spec to the
+disputed reading, reject upholds the pinned contract and the
+implementer conforms to it. Every stop-report — halted or not — includes
 the one-line resume command, so the human, or the next session, knows
 exactly how to continue. The resume command is simply: start a fresh
 Claude Code session in the project directory. The plugin's

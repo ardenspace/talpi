@@ -11,7 +11,11 @@ Check exactly three things:
    (an env-var override, a sandboxed path, an injected fake), read the
    code of the real-world default path the seam bypasses — seam-only
    tests can leave the primary path violating the very clause the
-   tests appear to pin.
+   tests appear to pin. If the contract itself appears wrong — it
+   contradicts the spec's intent or another contract, and the
+   implementation visibly contorted to satisfy it — report that as
+   `[ESCALATE]`: a wrong contract is the human's to amend, never
+   something conformance should hide.
 2. Smuggled irreversible decisions — schema changes, new external
    dependencies, API shape changes, or anything on the Reversibility
    Ledger's Decided list that was altered without the human. These are

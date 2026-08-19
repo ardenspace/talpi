@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.5.1 — 2026-08-20
+Prose-only release from the nanpaseom dogfood run's retrospectives —
+no new scripts, files, or state; per-run token cost goes down, not up.
+- **Contract disputes are first-class** (talpirun): an implementer who
+  believes a pinned contract is itself wrong says so and stops instead
+  of contorting internals until the test passes — "implementation
+  violates contract" is the implementer's to fix, "contract is wrong"
+  is only ever the human's. The orchestrator journals `phase <n>
+  contract dispute: <summary>` and halts through the existing
+  blocking-escalation path (ratify amends the contract test and spec;
+  reject upholds the contract). The phase verifier now also escalates
+  when an implementation visibly contorted to satisfy a wrong
+  contract.
+- **Self-consistency pass before panel re-runs** (talpispec): after
+  applying a round's resolutions, the orchestrator re-reads the spec
+  for contradictions the edits themselves introduced, before
+  dispatching any re-run — in the nanpaseom run, 3 of 10 BLOCKINGs
+  were self-inflicted by round-1 spec edits, costing a full
+  three-reviewer round.
+- **Environment facts recorded once** (talpirun): port assignments,
+  do-not-kill services, and other machine quirks go into
+  conventions.md when the run's first dispatch is prepared, instead of
+  being repeated ad hoc in every dispatch prompt — conventions.md is
+  already inlined into each dispatch.
+
 ## 0.5.0 — 2026-08-19
 - **Knowledge distillation: runs stop forgetting, without inheriting
   lies.** New file `.talpi/knowledge.md` — with journal.md, the only

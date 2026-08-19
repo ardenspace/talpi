@@ -1,7 +1,7 @@
 {
   "name": "talpi",
   "description": "Molting-driven development pipeline: harden the boundaries with human-designed contracts, let the interior grow fast and free. Spec through conversation, build autonomously, verify only where change is expensive.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": {
     "name": "ardenspace",
     "email": "ardensdevspace@gmail.com"

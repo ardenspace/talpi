@@ -130,6 +130,17 @@ unresolved — but resolution has exactly three forms: fix the spec,
 have the human overrule the finding (below), or both. The panel never
 gets an unbounded veto.
 
+**Self-consistency pass.** Re-run `[BLOCKING]`s are mostly
+self-inflicted: a fix written into one section quietly contradicts
+another section the interview already settled. So after applying a
+round's resolutions and before dispatching any re-run, re-read the
+spec once with exactly one question — does anything the latest edits
+touched now contradict another part of the spec? Repair what this
+finds within the same edit. This is the orchestrator's own pass, never
+a panel dispatch; it exists so the re-run panel spends its narrowed
+`[BLOCKING]` license on real problems instead of contradictions the
+fixes created.
+
 **Re-run scoping and cap.** A full, unscoped panel does not converge:
 fresh reviewers mint new findings every round, and the adversarial and
 boundary lenses pull the same lines in opposite directions
