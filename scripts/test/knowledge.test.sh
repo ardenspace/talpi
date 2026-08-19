@@ -178,5 +178,18 @@ for p in \
   fi
 done
 
+# 11) talpirun carries the write rule and the isolation prohibition:
+#     distill → gate → journal `knowledge distilled` before `run done`,
+#     and knowledge.md never enters a verifier/reviewer dispatch nor
+#     launders into conventions.md.
+R="$ROOT/skills/talpirun/SKILL.md"
+oneline="$(tr '\n' ' ' < "$R")"
+grep -q 'talpi-knowledge.sh' "$R" && ok || fail "talpirun: never calls the knowledge gate script"
+grep -q 'knowledge distilled' "$R" && ok || fail "talpirun: no 'knowledge distilled' journal event"
+echo "$oneline" | grep -q 'never enters a verifier or run-reviewer dispatch' && ok \
+  || fail "talpirun: no prohibition on passing knowledge.md into verifier/reviewer dispatches"
+echo "$oneline" | grep -q 'never merged into `.talpi/conventions.md`' && ok \
+  || fail "talpirun: no conventions-laundering rule"
+
 echo "knowledge.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

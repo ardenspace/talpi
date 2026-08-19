@@ -105,7 +105,7 @@ human-only reopening).
   fixture); isolation greps (verifier/reviewer prompts and their dispatch
   instructions never reference knowledge.md; conventions-laundering rule
   present in skills).
-- [ ] 4. `skills/talpirun/SKILL.md`: distillation step in Completion's
+- [x] 4. `skills/talpirun/SKILL.md`: distillation step in Completion's
   acceptance branch (distill → gate → drop/demote → journal `knowledge
   distilled`); explicit prohibition on passing knowledge.md into any
   verifier/reviewer dispatch.

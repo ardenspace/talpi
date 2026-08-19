@@ -153,6 +153,14 @@ project name, and the diff range covering this phase's work:
 `<base>..HEAD`, where `<base>` is the hash recorded in the phase's
 `phase <n> started (base: <hash>)` journal line.
 
+**Lane isolation.** If `.talpi/knowledge.md` exists (a previous run
+distilled it), it never enters a verifier or run-reviewer dispatch —
+not the path, not its contents inlined into the prompt. And knowledge.md
+material is never merged into `.talpi/conventions.md`: the verifier
+reads conventions.md, which carries only what *this run* mined or
+observed. The verification lane stays blind to inherited knowledge so
+an inherited blind spot cannot recruit the very lane meant to catch it.
+
 The verifier returns one line per finding, `[FIX]` or `[ESCALATE]`, or
 returns exactly `CLEAN`. Fix every `[FIX]` finding before moving on —
 send it back to a fresh implementer subagent, the same as any other
@@ -283,9 +291,31 @@ verification is clean or resolved:
 5. Wait for the human's response, same as any other stop-report: the
    run does not send further reports on its own from here.
 
-**On acceptance:** rewrite `.talpi/state.md` in full, all four keys:
-`run_status: done`, `current_phase` and `phases_total` unchanged,
-`updated: <ISO date>`. Journal `run done`.
+**On acceptance:** distill the run's knowledge before closing the run:
+
+1. Write (or extend) `.talpi/knowledge.md` — entry grammar and section
+   order are defined with the rest of the state format. Only knowledge
+   that cannot lie survives: human decisions as **verbatim quotes**,
+   copied byte-for-byte from the spec's Reversibility Ledger or a
+   journal line (prefer journal lines — journal.md never moves across
+   runs); machine-verifiable facts as **replayable commands** with the
+   expected output, the current commit hash, and the files they depend
+   on; everything interpretive — including negative knowledge like
+   "tried Z, failed" — as **Open questions**, phrased as questions,
+   never statements.
+2. Run the gate — a script, not judgment:
+
+       sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-knowledge.sh" check
+       sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-knowledge.sh" replay
+
+   Drop every entry either command reports as failing, or demote it to
+   an Open question, and re-run until both are clean. Trust comes from
+   the gate, not the distillation — the same architecture as
+   implementers plus contract tests.
+3. Journal `knowledge distilled`.
+4. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
+   done`, `current_phase` and `phases_total` unchanged, `updated: <ISO
+   date>`. Journal `run done`.
 
 **On rejection:** this is not an escalation — it reopens the phase
 loop as a new phase, so the fix work gets the same machinery as any
