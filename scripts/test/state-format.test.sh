@@ -14,7 +14,7 @@ if [ ! -f "$SF" ]; then
   fail "missing docs/state-format.md"
 else
   ok
-  for f in spec.md plan.md conventions.md state.md journal.md handoff.md; do
+  for f in spec.md plan.md conventions.md state.md journal.md handoff.md knowledge.md; do
     grep -q "\.talpi/$f" "$SF" && ok || fail "state-format.md does not define .talpi/$f"
   done
 fi

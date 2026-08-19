@@ -6,13 +6,14 @@ Skills and agents must never invent new state files or namespaces outside of `.t
 
 ## State scripts
 
-Three plugin scripts mechanize reading and writing this state, so rule-following is a tool call rather than prose interpretation. They are the canonical parser and writers; skills invoke them via `${CLAUDE_PLUGIN_ROOT}/scripts/`:
+Four plugin scripts mechanize reading and writing this state, so rule-following is a tool call rather than prose interpretation. They are the canonical parser and writers; skills invoke them via `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 
-- **`talpi-status.sh [root]`** — read-only. Reads `.talpi/`, applies the conflict rule (journal wins over `state.md`) and the guard/resume decision table, and prints the run's position plus exactly one `next:` action line. Disagreements between `state.md` and the journal surface as `warning:` lines. **The decision table lives in this script alone** — skill prose routes on the script's output and must not duplicate the table.
-- **`talpi-journal.sh "<event>" [root]`** — appends one line to `.talpi/journal.md` in the canonical `- [<ISO date>] <event>` form. The only sanctioned way to write the journal.
+- **`talpi-status.sh [root]`** — read-only. Reads `.talpi/`, applies the conflict rule (journal wins over `state.md`) and the guard/resume decision table, and prints the run's position plus exactly one `next:` action line. Disagreements between `state.md` and the journal surface as `warning:` lines, and so does journal tampering (a committed journal line edited or removed). **The decision table lives in this script alone** — skill prose routes on the script's output and must not duplicate the table.
+- **`talpi-journal.sh "<event>" [root]`** — appends one line to `.talpi/journal.md` in the canonical `- [<ISO date>] <event>` form. The only sanctioned way to write the journal. Before appending it verifies the committed (HEAD) journal is a byte-prefix of the working copy and refuses to append onto a tampered journal — append-only is a mechanical guarantee, not a convention.
 - **`talpi-state.sh <run_status> <current_phase> <phases_total> [root]`** — rewrites `.talpi/state.md` in full, validating the `run_status` vocabulary and numeric phases, stamping `updated`. The only sanctioned way to write the snapshot.
+- **`talpi-knowledge.sh check|replay [root]`** — the trust gate over `.talpi/knowledge.md`. `check` is read-only: validates the file's structure and entry grammar, resolves every Decision quote content-addressed against `spec.md`, `archive/*/spec.md`, and `journal.md`, enforces question form in Open questions, and flags Facts whose `scope` files changed since their `as of` hash as `stale — demote to question`. `replay` runs every Fact's command from the project root and reports pass/fail per entry — the write-time gate; recon may also replay before trusting an inherited fact.
 
-`root` defaults to `$CLAUDE_PROJECT_DIR`, then the working directory. The decision table's behavior is pinned by `scripts/test/status.test.sh`.
+`root` defaults to `$CLAUDE_PROJECT_DIR`, then the working directory. The decision table's behavior is pinned by `scripts/test/status.test.sh`; the knowledge gate and the append-only guard by `scripts/test/knowledge.test.sh`.
 
 ---
 
@@ -123,6 +124,8 @@ Example events (illustrative, not exhaustive):
 
 On conflicting entries (same timestamp or event), the latest line wins, and only that version is authoritative.
 
+Append-only is a mechanical guarantee, not a convention: before appending, `talpi-journal.sh` verifies that the committed (HEAD) version of journal.md is a byte-prefix of the working copy, and refuses to append onto a tampered journal. `talpi-status.sh` surfaces the same condition as a `warning:` line. This matters beyond hygiene — journal.md is a provenance store: `knowledge.md`'s verbatim Decision quotes resolve against journal lines, so line immutability is the load-bearing wall under every content-addressed check.
+
 ---
 
 ## .talpi/handoff.md
@@ -179,6 +182,65 @@ Example:
 
 ---
 
+## .talpi/knowledge.md
+
+The distilled memory of past runs. Together with `journal.md`, one of only two files that survive across runs: a new run over a done project archives `spec.md` and `plan.md` into `.talpi/archive/<ISO date>/`, but `knowledge.md` (like `journal.md`) stays in place and keeps accumulating. Written by the `talpirun` skill at completion — on acceptance, before the `run done` journal line — and read only by the implementation lane of the next run (see the read rule below).
+
+The governing rule: **inherit only knowledge that cannot lie.** Knowledge splits into three types with different contamination profiles — records of human choice (cannot be wrong), machine-verifiable facts (replaying them exposes any falsehood), and model interpretations (no verification anchor, so plausible-but-wrong inherits as truth). The first two persist, each in a form a script can verify; the third survives only as a question, never a statement — labels like "unverified" do not defuse anchoring, so statement form is banned outright.
+
+The first line is `# Knowledge`, followed by exactly these three sections, in this order. Entries start with a `- <field>:` line; continuation fields are indented two spaces.
+
+### `## Decisions`
+
+Verbatim quotes of human decisions — records of choice, not truth claims. No model paraphrase: the check is string equality against the original, so distortion dies mechanically.
+
+```
+- quote: <text copied byte-for-byte from spec.md's Reversibility Ledger or a journal line>
+  rationale: <the decision's rationale, also copied byte-for-byte>
+  source: <where it was copied from, e.g. "journal.md" or "spec.md Ledger">
+  date: <YYYY-MM-DD>
+```
+
+`rationale` is optional (a journal line may not record one), but when present it is verbatim-checked like the quote. Provenance is **content-addressed**: `quote` (and `rationale`) must appear verbatim in `.talpi/spec.md`, `.talpi/archive/*/spec.md`, or `.talpi/journal.md`. The `source` field is a human-facing hint only — the check never trusts it — so entries survive a later run archiving spec.md into a dated directory unknowable at distillation time. Prefer journal lines as quote targets: journal.md is the one file that never moves.
+
+Entries are dated because human decisions go stale. Reopening or retiring a Decision is a human act, never the model's.
+
+### `## Verified facts`
+
+Replayable commands only — a dressed-up interpretation has no command to replay, so it cannot enter this section.
+
+```
+- fact: <short name>
+  command: <POSIX shell command, run from the project root>
+  expect: <text the command's output must contain>
+  as of: <commit hash at which the fact was last verified>
+  scope: <space-separated paths the fact depends on (no spaces within a path)>
+```
+
+A fact replays by running `command` from the project root; it passes iff the command exits 0 and its output contains the `expect` text. `scope` is descriptive only — which files or surfaces the command exercises. Semantic claims ("guarantees X", "pins Y") are banned from Fact prose; what a fact *means* is an interpretation and belongs in Open questions. The check flags any fact whose `scope` files changed since its `as of` hash: `stale — demote to question`.
+
+### `## Open questions`
+
+The only afterlife for interpretations, and for negative knowledge ("tried Z, failed"). Question form is mechanically enforced — the text must end with `?`. Provenance pointers (a commit hash, a journal line) are allowed, but the entry is homework for the next run, never a belief it inherits.
+
+```
+- question: <text ending with ?>
+  source: <optional provenance pointer — commit hash, journal line>
+```
+
+### Write rule
+
+At completion, on acceptance and before the `run done` journal line, the orchestrator distills the run's learnings into the three sections, then runs the gate — `talpi-knowledge.sh check` and `talpi-knowledge.sh replay`. Entries that fail are dropped or demoted to Open questions, and the gate re-runs until clean. Trust comes from the gate, not the distiller — the same trust architecture as implementers plus contract tests.
+
+### Read rule (lane isolation)
+
+Only the implementation lane ever reads knowledge.md: talpispec / talpirefactor recon, and implementers via the approved spec. Verifiers, run reviewers, and spec review panels never see it — not the file path, not its contents inlined into a dispatch prompt — so inherited blind spots stay decorrelated from the verification lane. Two guards against laundering knowledge into the verification lane:
+
+- knowledge.md is never merged into `conventions.md` (the verifier reads conventions.md); conventions.md only carries what *this run* mined or observed.
+- When recon feeds a knowledge-derived item into the spec, it marks the origin, and the human approves the spec — knowledge gains execution authority only through that human gate.
+
+---
+
 ## Running State Lifecycle
 
 A typical talpi run progresses:
@@ -186,7 +248,7 @@ A typical talpi run progresses:
 1. **speccing** — `talpispec` writes spec.md, spec.md is reviewed
 2. **planning** — `talpiplan` writes plan.md from the approved spec, plan.md is reviewed
 3. **building** — `talpirun` executes phases, updating state.md and journal.md at phase boundaries
-4. **done** — all phases complete; run concludes with run_status: done
+4. **done** — all phases complete; on acceptance the run distills `knowledge.md` (gated by `talpi-knowledge.sh`), then concludes with run_status: done
 5. **halted** — if a phase-end verifier finding alters a Reversibility Ledger **Decided** entry, the run transitions to halted for a human ruling, with a journal explanation (context, time, or resource limits never halt a run — those are self-served via auto-compact and the session-start hook)
 
 At any transition, handoff.md is written to ensure the next session can resume without conversation history.

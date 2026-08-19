@@ -94,7 +94,7 @@ human-only reopening).
 
 ## Steps
 
-- [ ] 1. `docs/state-format.md`: define `.talpi/knowledge.md` (sections, entry
+- [x] 1. `docs/state-format.md`: define `.talpi/knowledge.md` (sections, entry
   grammar, write/read/isolation rules, archive interaction) + journal
   append-only guarantee note + script contract updates.
 - [ ] 2. `scripts/talpi-knowledge.sh` (`check` / `replay`) + append-only guard
