@@ -99,7 +99,7 @@ human-only reopening).
   append-only guarantee note + script contract updates.
 - [x] 2. `scripts/talpi-knowledge.sh` (`check` / `replay`) + append-only guard
   in `talpi-journal.sh` + tamper warning in `talpi-status.sh`.
-- [ ] 3. `scripts/test/knowledge.test.sh`: entry-grammar fixtures; content-
+- [x] 3. `scripts/test/knowledge.test.sh`: entry-grammar fixtures; content-
   addressed provenance incl. archive path; replay gate (passing + failing
   command fixtures); staleness demotion flag; journal tamper refusal (git
   fixture); isolation greps (verifier/reviewer prompts and their dispatch
