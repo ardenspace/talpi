@@ -35,8 +35,9 @@ draft left off. Two brownfield additions:
   then move the old `spec.md` and `plan.md` into
   `.talpi/archive/<ISO date>/` before writing anything new.
   `journal.md` stays in place and keeps appending — one history, many
-  runs. Journal `refactor run started over done run` when the archive
-  move lands.
+  runs — and so does `.talpi/knowledge.md`, the distilled memory the
+  previous run left (Act 2 below reads it). Journal `refactor run
+  started over done run` when the archive move lands.
 
 ## Act 1 — Intent Conversation
 
@@ -79,6 +80,19 @@ a reader who shares the orchestrator's conversation inherits the
 human's framing of the code, and the point of recon is to hear what
 the code says even where it disagrees with the human.
 
+If `.talpi/knowledge.md` exists (like journal.md, it survives across
+runs and the archive move), fold it into the recon — implementation-
+lane eyes only, never a reviewer's. Use each section as its type
+demands: **Decisions** are constraints the target shape must respect —
+carry the still-binding ones into the Reversibility Ledger, and leave
+reopening any of them to the human. **Verified facts** are re-mining
+skips, but only after the gate — run
+`sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-knowledge.sh" check` and
+`replay` first; a passing fact spares the recon re-deriving it, while
+a failing or stale one is at most a question, never carried as truth.
+**Open questions** are recon homework — hand each to the matching
+recon angle so this run answers what the last one could not.
+
 Synthesize the three reports and present them to the human before
 writing any spec: the mined conventions (including self-
 contradictions — each one is either a refactor candidate or a
@@ -117,9 +131,15 @@ semantics. Sections reinterpret for brownfield, structure unchanged:
   (public APIs, schemas, formats, user-visible behavior). *Delegated*
   = internals licensed to be reshaped freely.
 - **Conventions** — the mined conventions, recorded verbatim. Source
-  of truth is the codebase, not invention: talpiplan drafts
-  `.talpi/conventions.md` from this section, so what the code already
-  does becomes what the run's subagents follow.
+  of truth is the codebase, not invention — and never copied from
+  knowledge.md: talpiplan drafts `.talpi/conventions.md` from this
+  section, the verifier cites conventions.md, and inherited knowledge
+  must not launder into that lane. This-run mining only.
+
+Every spec item derived from knowledge.md carries an origin mark —
+`(from knowledge.md)` — so the human sees at approval exactly which
+parts of the spec ride on inherited knowledge; knowledge gains
+execution authority only through that human gate.
 
 ## Panel Review
 

@@ -109,7 +109,7 @@ human-only reopening).
   acceptance branch (distill → gate → drop/demote → journal `knowledge
   distilled`); explicit prohibition on passing knowledge.md into any
   verifier/reviewer dispatch.
-- [ ] 5. `skills/talpirefactor/SKILL.md` + `skills/talpispec/SKILL.md`: recon
+- [x] 5. `skills/talpirefactor/SKILL.md` + `skills/talpispec/SKILL.md`: recon
   reads knowledge.md when present — Decisions as constraints, gate-passing
   Facts as re-mining skips, Questions as homework; origin-marking rule for
   knowledge-derived spec items; conventions.md stays this-run-only.

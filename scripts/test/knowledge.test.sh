@@ -191,5 +191,20 @@ echo "$oneline" | grep -q 'never enters a verifier or run-reviewer dispatch' && 
 echo "$oneline" | grep -q 'never merged into `.talpi/conventions.md`' && ok \
   || fail "talpirun: no conventions-laundering rule"
 
+# 12) The implementation lane reads knowledge.md by type — spec and
+#     refactor recon replay before trusting, mark knowledge-derived
+#     spec items with their origin, and keep the panel blind; refactor
+#     conventions stay this-run-mined.
+SPEC="$ROOT/skills/talpispec/SKILL.md"
+REF="$ROOT/skills/talpirefactor/SKILL.md"
+for f in "$SPEC" "$REF"; do
+  grep -q 'talpi-knowledge.sh' "$f" && ok || fail "$(basename "$(dirname "$f")"): never gates inherited facts through talpi-knowledge.sh"
+  grep -q '(from knowledge.md)' "$f" && ok || fail "$(basename "$(dirname "$f")"): no origin mark for knowledge-derived spec items"
+done
+tr '\n' ' ' < "$SPEC" | grep -q 'panel never sees knowledge.md' && ok \
+  || fail "talpispec: panel blindness to knowledge.md not stated"
+tr '\n' ' ' < "$REF" | tr -s ' ' | grep -q 'never copied from knowledge.md' && ok \
+  || fail "talpirefactor: conventions not fenced off from knowledge.md"
+
 echo "knowledge.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

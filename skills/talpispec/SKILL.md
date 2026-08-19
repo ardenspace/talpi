@@ -26,6 +26,31 @@ build — route to the talpirefactor skill instead; it produces the same
 spec artifacts through a codebase recon rather than a product
 conversation.
 
+## Inherited knowledge
+
+If `.talpi/knowledge.md` exists, a previous run distilled it. Read it
+before Act 2 — this skill is the implementation lane, the one lane
+licensed to. Use each section as its type demands:
+
+- **Decisions** are standing constraints, not material to re-litigate:
+  raise each at the relevant lens ("a previous run decided X — still
+  binding?") and carry the still-binding ones into the Reversibility
+  Ledger. Reopening one is the human's call, never yours.
+- **Verified facts** are re-mining skips, but only after the gate: run
+  `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-knowledge.sh" check` and
+  `replay` first — a passing fact need not be re-derived; a failing or
+  stale one is at most an Open question, never carried as truth.
+- **Open questions** are homework, not beliefs: answer them where the
+  interview touches their material, or leave them standing — never
+  restate one as a fact.
+
+Every spec item derived from knowledge.md carries an origin mark —
+`(from knowledge.md)` — so the human sees at approval exactly which
+parts of the spec ride on inherited knowledge; knowledge gains
+execution authority only through that human gate. The panel never
+sees knowledge.md: reviewers get the spec file path only, and the
+origin marks inside the spec are all they may learn of it.
+
 ## Act 1 — Product Conversation
 
 Start from "what do you want to build?" and stay entirely in the user's
