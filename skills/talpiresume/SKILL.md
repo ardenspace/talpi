@@ -17,11 +17,18 @@ to do that resuming.
 `state.md` is a convenience snapshot — if it contradicts the journal, trust
 the journal and rewrite `state.md`.
 
-Apply this before routing: read `.talpi/state.md`, then check the tail of
-`.talpi/journal.md` for anything more recent that `state.md` doesn't
-reflect (a phase advance, a halt, a resume-after-ratify or
-resume-after-reject). If they disagree, the journal wins — rewrite
-`state.md` to match it, then route off the corrected value.
+Apply this before routing — mechanically, not by rereading the files:
+
+    sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-status.sh"
+
+The script reads `state.md`, checks the journal for anything more
+recent that the snapshot doesn't reflect (a phase advance, a halt, a
+resume-after-ratify or resume-after-reject), and prints the corrected
+position with the journal winning every disagreement — flagged as
+`warning:` lines. When warned, rewrite `state.md` to the corrected
+values via `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh"
+<run_status> <current_phase> <phases_total>`, then route off the
+script's `next:` line.
 
 The same precedence applies to `handoff.md`: it carries run state and
 context — what's done, the concrete next step, gotchas — not
@@ -33,8 +40,11 @@ skills.
 ## Fallback: no readable state.md
 
 If `.talpi/` exists but `state.md` is missing, or its `run_status` line
-can't be read, do not guess blindly — check the journal first, then
-rewrite `state.md` in full (all four keys) before routing:
+can't be read, the status script infers the position itself (journal
+first, then the spec/plan status markers) and says so with a
+`warning:` line — trust its inference over guessing. Rewrite `state.md`
+in full via the state script before routing. The inference ladder it
+applies:
 
 - Check the tail of `.talpi/journal.md` for the most recent relevant
   entry first. If it is `run done`, infer `done`. If it is `run

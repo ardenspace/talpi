@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.4.0 — 2026-08-19
+- **The state machine moved from prose to scripts.** talpirun's Guard
+  and talpiresume's conflict rule were a decision table encoded in
+  skill prose ("if the journal tail is X, do Y") — every re-entry
+  relied on a session parsing journal lines correctly, and the odds of
+  a misread accumulate over long autonomous runs. Three scripts now
+  mechanize it, turning rule-following from instruction adherence into
+  tool calls:
+  - `scripts/talpi-status.sh` — read-only; applies journal-over-state
+    precedence and the full guard/resume decision table, prints the
+    run's position and exactly one `next:` action (plus `warning:`
+    lines when state.md contradicts the journal). The table lives
+    only here — skills route on its output and no longer restate it,
+    so there is no second copy to drift.
+  - `scripts/talpi-journal.sh` — the only sanctioned journal writer;
+    stamps the canonical `- [<ISO date>] <event>` line.
+  - `scripts/talpi-state.sh` — the only sanctioned state.md writer;
+    validates the run_status vocabulary, writes all four keys, stamps
+    `updated`.
+  The decision table's behavior is pinned by
+  `scripts/test/status.test.sh` (fixture runs for every route: spec
+  draft, planning, mid-phase, completion re-entry with narrowed diff,
+  awaiting acceptance, declined, halt/resume, journal-wins conflicts).
+  docs/state-format.md documents the script contract.
+
 ## 0.3.4 — 2026-08-16
 - Three decisions from the practice-3d dogfood run
   (docs/plans/2026-08-16-dogfood-feedback-practice-3d.md):

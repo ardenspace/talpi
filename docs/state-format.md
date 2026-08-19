@@ -4,6 +4,16 @@ All cross-session state lives in `.talpi/` at the target project root. This dire
 
 Skills and agents must never invent new state files or namespaces outside of `.talpi/`. Every reference to `.talpi/*` from a skill must be to a file defined in this document.
 
+## State scripts
+
+Three plugin scripts mechanize reading and writing this state, so rule-following is a tool call rather than prose interpretation. They are the canonical parser and writers; skills invoke them via `${CLAUDE_PLUGIN_ROOT}/scripts/`:
+
+- **`talpi-status.sh [root]`** — read-only. Reads `.talpi/`, applies the conflict rule (journal wins over `state.md`) and the guard/resume decision table, and prints the run's position plus exactly one `next:` action line. Disagreements between `state.md` and the journal surface as `warning:` lines. **The decision table lives in this script alone** — skill prose routes on the script's output and must not duplicate the table.
+- **`talpi-journal.sh "<event>" [root]`** — appends one line to `.talpi/journal.md` in the canonical `- [<ISO date>] <event>` form. The only sanctioned way to write the journal.
+- **`talpi-state.sh <run_status> <current_phase> <phases_total> [root]`** — rewrites `.talpi/state.md` in full, validating the `run_status` vocabulary and numeric phases, stamping `updated`. The only sanctioned way to write the snapshot.
+
+`root` defaults to `$CLAUDE_PROJECT_DIR`, then the working directory. The decision table's behavior is pinned by `scripts/test/status.test.sh`.
+
 ---
 
 ## .talpi/spec.md

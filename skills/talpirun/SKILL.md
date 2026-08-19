@@ -15,42 +15,44 @@ acceptance brings the human back in.
 
 ## Guard
 
-Before starting, check `.talpi/plan.md`. If it does not exist, or its
-first line is not `status: approved`, do not start building — report
-that no approved plan exists yet and route to the talpiplan skill
-instead.
+Before starting, run the plugin's status script and follow its `next:`
+line. The where-is-this-run decision table lives in the script, not in
+prose, so re-entry is a tool call rather than a journal-reading
+exercise:
 
-If `.talpi/state.md` reads `run_status: halted`, do not build — hand
-off to the talpiresume skill so the human can rule on the halt first.
-One exception: arriving *from* talpiresume with the human's ruling
-already in hand. Then `halted` on disk is expected — execute the
-ruling (the ratify/reject path under Phase report, which sets
-`run_status` back to `building`) instead of bouncing back to
-talpiresume.
+    sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-status.sh"
 
-Read `.talpi/state.md` for `current_phase` and `phases_total` and work
-the plan one phase at a time starting there. `current_phase` equal to
-`phases_total` is normal — it means the last phase is the one being
-built. Only `current_phase` *past* `phases_total` means the phase loop
-is over (the last phase's report advanced the counter); then check
-`.talpi/journal.md` for where completion stands instead of re-running
-a phase. If the journal's tail is `run done`, the run is genuinely
-finished — report that. If the tail is `phase <phases_total> reported`
-with nothing later, the phase loop finished but completion never ran —
-go straight to Completion. If the tail is a `run review (through
-<hash>)` line with nothing later, completion was interrupted between
-the run review and the final report — re-enter Completion from step 1
-(the smoke run and the review are idempotent, and the review's diff
-range narrows to commits after `<hash>`, so the redo is cheap). If the
-tail is `final report sent, awaiting
-acceptance` with nothing later, completion already ran and is waiting
-on the human — remind them the final report is pending their
-acceptance and wait; do not rebuild or re-send the report. If instead
-the tail is `acceptance declined: <summary>`, or shows fix-loop events
-after the awaiting-acceptance line, the human already responded and
-the reopened fix work is in progress — continue the phase loop rather
-than waiting (if plan.md has no Acceptance-fixes phase yet, appending
-it is the first move — see Completion's rejection path).
+Route on the `next:` line it prints:
+
+- **route to talpispec / talpirefactor / talpiplan** — no approved
+  plan yet; do not build, hand off to that skill.
+- **halted** — do not build; hand off to the talpiresume skill so the
+  human can rule on the halt first (the script surfaces the
+  `reason:`). One exception: arriving *from* talpiresume with the
+  human's ruling already in hand. Then `halted` on disk is expected —
+  execute the ruling (the ratify/reject path under Phase report, which
+  sets `run_status` back to `building`) instead of bouncing back to
+  talpiresume.
+- **phase loop — work phase `<n>`** — enter the Phase loop below at
+  that phase; a `step:` line names the phase's first unchecked step.
+  `current_phase` equal to `phases_total` is normal — it means the
+  last phase is the one being built.
+- **completion** — the phase loop is over; enter Completion at step 1.
+  A `note:` line may narrow the run review's diff range to
+  `<hash>..HEAD` — earlier commits were already reviewed, and the
+  smoke run and review are idempotent, so the redo is cheap.
+- **awaiting acceptance** — completion already ran and is waiting on
+  the human; remind them the final report is pending their acceptance
+  and wait. Do not rebuild or re-send the report.
+- **reopen phase loop** — acceptance was declined and the reopened fix
+  work is in progress; continue the phase loop rather than waiting (if
+  plan.md has no Acceptance-fixes phase yet, appending it is the first
+  move — see Completion's rejection path).
+- **run done** — the run is genuinely finished; report that.
+
+Any `warning:` line means `.talpi/state.md` disagrees with the journal
+— the journal wins. Rewrite state.md to the corrected values (the
+state script below) before continuing.
 
 ## Phase loop
 
@@ -74,8 +76,14 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    Journal `phase <n> started (base: <hash>)` when the phase's first
    step is dispatched, where `<hash>` is the commit HEAD points at just
    before that step — the phase's diff range starts there. (Every
-   journal entry, here and below, is one appended line of the form
-   `- [<ISO date>] <event>` — journal.md is never rewritten.)
+   journal entry, here and below, is appended through the plugin's
+   journal script — `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-journal.sh"
+   "<event>"` — which stamps the canonical `- [<ISO date>] <event>`
+   form; journal.md is never rewritten or hand-formatted. Likewise,
+   every state.md rewrite goes through the state script —
+   `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" <run_status>
+   <current_phase> <phases_total>` — which validates the vocabulary,
+   writes all four keys, and stamps `updated`.)
 2. **Pin contracts.** The first step of every phase writes that phase's
    `Contracts:` list as failing tests, before any other implementation
    step runs. Journal `phase <n> contracts pinned` once those tests
