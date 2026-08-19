@@ -97,7 +97,7 @@ human-only reopening).
 - [x] 1. `docs/state-format.md`: define `.talpi/knowledge.md` (sections, entry
   grammar, write/read/isolation rules, archive interaction) + journal
   append-only guarantee note + script contract updates.
-- [ ] 2. `scripts/talpi-knowledge.sh` (`check` / `replay`) + append-only guard
+- [x] 2. `scripts/talpi-knowledge.sh` (`check` / `replay`) + append-only guard
   in `talpi-journal.sh` + tamper warning in `talpi-status.sh`.
 - [ ] 3. `scripts/test/knowledge.test.sh`: entry-grammar fixtures; content-
   addressed provenance incl. archive path; replay gate (passing + failing

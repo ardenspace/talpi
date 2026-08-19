@@ -31,6 +31,23 @@ if [ ! -d "$T" ]; then
   exit 0
 fi
 
+# --- journal tamper check: append-only is mechanical ------------------
+# Same byte-prefix rule talpi-journal.sh enforces before appending; here
+# it only warns — status is read-only, and the human decides how to
+# restore the committed lines.
+if [ -f "$JOURNAL" ] && git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  prefix="$(git -C "$ROOT" rev-parse --show-prefix 2>/dev/null)"
+  if git -C "$ROOT" cat-file -e "HEAD:${prefix}.talpi/journal.md" 2>/dev/null; then
+    HEADJ="$(mktemp)"
+    git -C "$ROOT" show "HEAD:${prefix}.talpi/journal.md" > "$HEADJ"
+    n=$(($(wc -c < "$HEADJ")))
+    if [ "$n" -gt 0 ] && ! head -c "$n" "$JOURNAL" | cmp -s "$HEADJ" -; then
+      echo "warning: journal.md tampered — the committed journal is not a byte-prefix of the working copy (append-only violated; journal lines are provenance, restore them before trusting state)"
+    fi
+    rm -f "$HEADJ"
+  fi
+fi
+
 # --- read the snapshot and status markers -----------------------------
 state_status=""; cur=""; total=""
 if [ -f "$STATE" ]; then
