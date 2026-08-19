@@ -43,8 +43,8 @@ else
 fi
 
 # 5) Hook behavior: resolves the project root (works from subdirs),
-#    surfaces unfinished runs, reports done runs as no work, and stays
-#    quiet when no .talpi/ exists.
+#    surfaces unfinished runs with a position snapshot, reports done
+#    runs as no work, and stays quiet when no .talpi/ exists.
 S="$ROOT/hooks/session-start.sh"
 if [ -f "$S" ]; then
   T="$(mktemp -d)"
@@ -52,12 +52,26 @@ if [ -f "$S" ]; then
   printf 'run_status: building\ncurrent_phase: 1\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
   out="$(cd "$T/proj/sub" && CLAUDE_PROJECT_DIR="$T/proj" sh "$S")"
   echo "$out" | grep -q 'run_status: building' && ok || fail "hook missed run from subdir via CLAUDE_PROJECT_DIR"
+  # Snapshot injection: the status script's next: line rides along,
+  # framed as orientation (not a direct instruction), and the skill
+  # pointer survives.
+  echo "$out" | grep -q 'next: ' && ok || fail "hook did not inject a next: snapshot line"
+  echo "$out" | grep -q 'snapshot' && ok || fail "hook did not frame the position as a snapshot"
+  echo "$out" | grep -q 'not an instruction' && ok || fail "hook snapshot missing not-an-instruction framing"
+  echo "$out" | grep -q 'talpiresume' && ok || fail "hook lost the talpiresume pointer"
   printf 'run_status: done\ncurrent_phase: 2\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
+  printf -- '- [2026-08-19T00:00:00Z] run done\n' > "$T/proj/.talpi/journal.md"
   out="$(cd "$T/proj" && CLAUDE_PROJECT_DIR="$T/proj" sh "$S")"
   echo "$out" | grep -q 'run_status: done' && ok || fail "hook did not report done run"
   echo "$out" | grep -qi 'no work' && ok || fail "hook did not say done run has no work"
   out="$(cd "$T" && CLAUDE_PROJECT_DIR="$T" sh "$S")"
   [ -z "$out" ] && ok || fail "hook not quiet without .talpi/"
+  # Fallback: status script unavailable — hook still surfaces the run.
+  H="$T/hooks-only/hooks"; mkdir -p "$H"; cp "$S" "$H/session-start.sh"
+  printf 'run_status: building\ncurrent_phase: 1\nphases_total: 2\nupdated: x\n' > "$T/proj/.talpi/state.md"
+  out="$(CLAUDE_PROJECT_DIR="$T/proj" sh "$H/session-start.sh")"
+  echo "$out" | grep -q 'run_status: building' && ok || fail "hook fallback lost the run status"
+  echo "$out" | grep -q 'talpiresume' && ok || fail "hook fallback lost the talpiresume pointer"
   rm -rf "$T"
 fi
 

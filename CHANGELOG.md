@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.1 — 2026-08-19
+- **Session-start hook injects a position snapshot.** The hook now runs
+  `talpi-status.sh` and includes its full output — run_status, phase
+  counters, warnings, and the `next:` line — so a fresh session starts
+  oriented even before any skill is invoked. Guardrails against the
+  known failure modes: the snapshot is framed as orientation ("not an
+  instruction to act on directly"), the talpiresume pointer stays (the
+  skill restores handoff/conventions context and the halted path,
+  which the snapshot does not carry), authority stays with the skill's
+  own later script run, and if the status script is unavailable the
+  hook falls back to the previous plain pointer. Behavior pinned in
+  manifest.test.sh.
+
 ## 0.4.0 — 2026-08-19
 - **The state machine moved from prose to scripts.** talpirun's Guard
   and talpiresume's conflict rule were a decision table encoded in
