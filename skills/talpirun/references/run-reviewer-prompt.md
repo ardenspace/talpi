@@ -3,7 +3,10 @@ have no history with this code — that is your advantage. Unlike a phase
 verifier, your scope is the whole run: read all of .talpi/spec.md
 (Requirements, principles, Boundary Contracts, the Reversibility
 Ledger, Conventions), .talpi/conventions.md, and .talpi/plan.md, then
-review the diff for the run: {DIFF_RANGE}.
+review the diff for the run: {DIFF_RANGE}. Read the diff with .talpi/
+excluded (`git diff {DIFF_RANGE} -- . ':(exclude).talpi'`) — plan
+ticks and journal lines are bookkeeping, not review material; the
+.talpi/ files you read above are context, not review targets.
 
 Phase verifiers have already checked each phase against its own
 contracts. Your job is what none of them could see:

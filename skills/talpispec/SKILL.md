@@ -20,6 +20,24 @@ spec already exists and route to talpiplan (if no plan yet) or talpirun
 `status: draft`, resume Act 2 or the panel from where the draft left off
 rather than starting over.
 
+One case outranks the approved-spec route: a **done run**. If `.talpi/`
+holds a run whose `run_status` is `done`, a new product idea is a new
+run over the same project. Confirm that with the human first — the
+archive move is theirs to authorize — then move the old `spec.md` and
+`plan.md` into `.talpi/archive/<ISO date>/`. `journal.md` stays in
+place and keeps appending — one history, many runs — and so does
+`.talpi/knowledge.md`, the distilled memory the previous run left
+(Inherited knowledge below reads it). When the archive move lands,
+journal `run started over done run` through the journal script:
+
+    sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-journal.sh" "run started over done run"
+
+The status script fences its journal scan on that exact event — without
+it, the archived run's `run done` line keeps routing the new run to
+"nothing to build". Then rewrite the snapshot and start Act 1:
+
+    sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" speccing 0 0
+
 One routing check before Act 1: if the ask is restructuring code that
 already works — a refactor of an existing codebase, not a product to
 build — route to the talpirefactor skill instead; it produces the same
@@ -121,9 +139,16 @@ or `[NOTE]`:
 - `[BLOCKING]` findings go back into the interview. Re-open the relevant
   lens with the human, resolve the finding, update the spec, and re-run
   the panel before proceeding to Approval.
-- `[NOTE]` findings do not gate approval. List them for the human when
-  you present the spec for approval, so they can act on any of them if
-  they choose.
+- `[NOTE]` findings do not gate approval. Self-evident ones — a
+  one-line wording or consistency fix whose resolution no one would
+  debate — may be folded straight into the spec without asking; those
+  edits pass through the same self-consistency pass as any other
+  resolution. Everything that carries a judgment call is listed for
+  the human at approval. The human still hears about all of it: the
+  approval presentation states in one line how many self-evident notes
+  were folded (full list on request) alongside the judgment calls
+  listed in full — approval-gate visibility is the axis, only the
+  noise moves.
 
 Do not proceed to Approval while any `[BLOCKING]` finding is
 unresolved — but resolution has exactly three forms: fix the spec,
@@ -192,17 +217,13 @@ lens's answers, recorded verbatim in the spec's `## Conventions`
 section — so a session death after approval loses nothing.
 
 The first time this draft is written, also initialize `.talpi/state.md`
-if it does not already exist, with exactly these four keys — partial
-writes are invalid:
+if it does not already exist — through the state script, which writes
+all four keys (partial writes are invalid) and stamps `updated`:
 
-```
-run_status: speccing
-current_phase: 0
-phases_total: 0
-updated: <ISO date>
-```
+    sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" speccing 0 0
 
-Present the spec to the human (including any open `[NOTE]` findings) and
+Present the spec to the human (including any open `[NOTE]` findings,
+plus the one-line count of self-evident notes already folded in) and
 ask them to approve it. Name the panel shape that reviewed it — on a
 thin-surface run, say in one line that the three lenses ran as a
 single reviewer and that the human can ask for the full three-reviewer
@@ -214,11 +235,12 @@ On approval:
 
 1. Change the first line of `.talpi/spec.md` from `status: draft` to
    `status: approved`.
-2. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
-   planning`, `current_phase: 0`, `phases_total: 0`, `updated: <ISO
-   date>`.
-3. Append an event to `.talpi/journal.md` recording that the spec was
-   approved (`- [<ISO date>] spec approved` — journal lines are always
-   `- [<ISO date>] <event>`, append-only; create the file if this is
-   its first entry).
+2. Rewrite `.talpi/state.md` through the state script:
+   `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" planning 0 0`.
+3. Journal the approval through the journal script —
+   `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-journal.sh" "spec approved"`
+   — which stamps the canonical `- [<ISO date>] <event>` form, creates
+   the file on its first append, and enforces append-only. Never
+   hand-format a journal line; every stage of the pipeline appends
+   through this script.
 4. Hand off to the talpiplan skill.

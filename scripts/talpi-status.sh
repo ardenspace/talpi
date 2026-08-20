@@ -75,6 +75,29 @@ n_done="$(ln_of '] run done')"
 n_halt="$(ln_of '] run halted:')"
 n_resume="$(ln_of 'resumed')"
 
+# --- multi-run: events before the last run-start marker are history ---
+# A new run over a done project archives spec.md/plan.md and journals
+# `run started over done run` (talpispec) or `refactor run started over
+# done run` (talpirefactor). journal.md itself never moves — one
+# history, many runs — so events before the last such marker belong to
+# the archived run and must not route this one.
+a="$(ln_of '] run started over done run')"
+b="$(ln_of '] refactor run started over done run')"
+n_start="$a"
+if [ -n "$b" ] && { [ -z "$n_start" ] || [ "$b" -gt "$n_start" ]; }; then
+  n_start="$b"
+fi
+past_start() { # blank a line number that precedes the last run-start marker
+  if [ -n "${1:-}" ] && [ -n "$n_start" ] && [ "$1" -lt "$n_start" ]; then
+    echo ""
+  else
+    echo "${1:-}"
+  fi
+}
+n_done="$(past_start "$n_done")"
+n_halt="$(past_start "$n_halt")"
+n_resume="$(past_start "$n_resume")"
+
 # --- effective run_status: journal wins over state.md -----------------
 jstatus=""
 if [ -n "$n_done" ] && { [ -z "$n_halt" ] || [ "$n_done" -gt "$n_halt" ]; }; then
@@ -162,10 +185,10 @@ fi
 
 # current_phase past phases_total: the phase loop is over; the journal's
 # most recent completion event decides where completion stands.
-n_reported="$(ln_of "] phase $total reported")"
-n_review="$(ln_of '] run review (through ')"
-n_await="$(ln_of '] final report sent, awaiting acceptance')"
-n_declined="$(ln_of '] acceptance declined')"
+n_reported="$(past_start "$(ln_of "] phase $total reported")")"
+n_review="$(past_start "$(ln_of '] run review (through ')")"
+n_await="$(past_start "$(ln_of '] final report sent, awaiting acceptance')")"
+n_declined="$(past_start "$(ln_of '] acceptance declined')")"
 
 last=0; which=""
 for pair in "reported:${n_reported:-}" "review:${n_review:-}" "await:${n_await:-}" "declined:${n_declined:-}"; do

@@ -8,7 +8,7 @@ Skills and agents must never invent new state files or namespaces outside of `.t
 
 Four plugin scripts mechanize reading and writing this state, so rule-following is a tool call rather than prose interpretation. They are the canonical parser and writers; skills invoke them via `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 
-- **`talpi-status.sh [root]`** — read-only. Reads `.talpi/`, applies the conflict rule (journal wins over `state.md`) and the guard/resume decision table, and prints the run's position plus exactly one `next:` action line. Disagreements between `state.md` and the journal surface as `warning:` lines, and so does journal tampering (a committed journal line edited or removed). **The decision table lives in this script alone** — skill prose routes on the script's output and must not duplicate the table.
+- **`talpi-status.sh [root]`** — read-only. Reads `.talpi/`, applies the conflict rule (journal wins over `state.md`) and the guard/resume decision table, and prints the run's position plus exactly one `next:` action line. On a multi-run journal, the scan is fenced at the last run-start marker (`run started over done run` / `refactor run started over done run`): events before it belong to an archived run and never route the current one. Disagreements between `state.md` and the journal surface as `warning:` lines, and so does journal tampering (a committed journal line edited or removed). **The decision table lives in this script alone** — skill prose routes on the script's output and must not duplicate the table.
 - **`talpi-journal.sh "<event>" [root]`** — appends one line to `.talpi/journal.md` in the canonical `- [<ISO date>] <event>` form. The only sanctioned way to write the journal. Before appending it verifies the committed (HEAD) journal is a byte-prefix of the working copy and refuses to append onto a tampered journal — append-only is a mechanical guarantee, not a convention.
 - **`talpi-state.sh <run_status> <current_phase> <phases_total> [root]`** — rewrites `.talpi/state.md` in full, validating the `run_status` vocabulary and numeric phases, stamping `updated`. The only sanctioned way to write the snapshot.
 - **`talpi-knowledge.sh check|replay [root]`** — the trust gate over `.talpi/knowledge.md`. `check` is read-only: validates the file's structure and entry grammar, resolves every Decision quote content-addressed against `spec.md`, `archive/*/spec.md`, and `journal.md`, enforces question form in Open questions, and flags Facts whose `scope` files changed since their `as of` hash as `stale — demote to question`. `replay` runs every Fact's command from the project root and reports pass/fail per entry — the write-time gate; recon may also replay before trusting an inherited fact.
@@ -112,15 +112,14 @@ The `phase <n> started (base: <hash>)` event records the commit the phase's diff
 
 Example events (illustrative, not exhaustive):
 ```markdown
-- [2026-08-05T10:00:00Z] run started: speccing
 - [2026-08-05T11:15:00Z] spec approved
-- [2026-08-05T11:30:00Z] run started: planning
 - [2026-08-05T14:00:00Z] plan approved, 4 phases
-- [2026-08-05T14:05:00Z] run started: building
 - [2026-08-05T14:06:00Z] phase 1 started (base: 3f2c9a1)
 - [2026-08-05T14:32:00Z] phase 1 verified
 - [2026-08-05T16:45:00Z] run halted: verifier found auth model changed from spec
 ```
+
+The journal is per-project, not per-run: a new run over a `done` project archives `spec.md` and `plan.md` but appends to the same journal. The boundary between runs is a run-start marker — `run started over done run` (talpispec) or `refactor run started over done run` (talpirefactor), journaled when the archive move lands. `talpi-status.sh` fences its scan at the last such marker, so an archived run's `run done` / `run halted:` / completion-tail events cannot route the current run.
 
 On conflicting entries (same timestamp or event), the latest line wins, and only that version is authoritative.
 

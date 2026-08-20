@@ -1,5 +1,54 @@
 # Changelog
 
+## 0.6.0 — 2026-08-21
+From the second nanpaseom dogfood retrospective — multi-run routing
+becomes real, and the last hand-formatted state writes disappear.
+- **Multi-run journal routing** (talpi-status.sh): the scan is now
+  fenced at the last run-start marker (`run started over done run` /
+  `refactor run started over done run`) — an archived run's `run
+  done`, `run halted:`, and completion-tail events can no longer route
+  the current run. Previously even talpirefactor's documented
+  archive-over-done-run flow left status reporting "done — nothing to
+  build". Pinned by four new status.test.sh fixtures.
+- **New-run-over-done-run procedure in talpispec** (guard): the
+  archive move (`spec.md`/`plan.md` → `.talpi/archive/<ISO date>/`,
+  journal and knowledge stay), previously written down only for
+  talpirefactor, now exists for greenfield re-runs too — human
+  confirmation first, then the `run started over done run` journal
+  marker the status fence keys on.
+- **Every stage writes state through the scripts**: talpispec,
+  talpiplan, and talpirefactor now journal and rewrite state.md via
+  talpi-journal.sh / talpi-state.sh like talpirun always did — no more
+  hand-formatted journal lines with drifting date formats.
+- **Implementer dispatch template** (talpirun,
+  `references/implementer-prompt.md`): the standing rules an
+  implementer must receive — the question rule and the
+  contract-dispute license with its canonical first-line form
+  (`CONTRACT DISPUTE: <contract id> — <one sentence>`) — now travel in
+  the template, so no implementer is dispatched without them and the
+  orchestrator can route a dispute off the reply's first line.
+- **Smoke-run reuse license, mechanical** (talpirun Completion): a
+  final-phase real walk journaled as `smoke walked (at: <hash>)` may
+  stand in for the completion smoke iff `git diff --name-only
+  <hash>..HEAD -- . ':(exclude).talpi'` prints only `*.md` paths — the
+  diff decides, never the session's judgment.
+- **Commit-message convention yields to the repo's** (talpirun): the
+  `talpi: phase <n> step <k>:` form is now an explicit default —
+  a repo's own commit convention, recorded in conventions.md, wins.
+  The non-negotiable part is named: code + plan.md tick in one commit.
+- **Reviewer diffs exclude `.talpi/`** (verifier and run-reviewer
+  prompts): plan ticks and journal lines are bookkeeping, not review
+  material; the `.talpi/` files stay readable as context.
+- **Panel `[NOTE]` folding license** (talpispec): self-evident
+  one-line notes may fold straight into the spec (through the
+  self-consistency pass); judgment calls are still listed, and the
+  approval presentation discloses the folded count.
+- **Knowledge-gate semantics stated where distillation happens**
+  (talpirun): Decision quotes are content-addressed (archive
+  tolerance is by design, `source:` is never trusted), Open questions
+  get only the form check because nothing trusts them, executable
+  trust comes from `replay` alone.
+
 ## 0.5.1 — 2026-08-20
 Prose-only release from the nanpaseom dogfood run's retrospectives —
 no new scripts, files, or state; per-run token cost goes down, not up.

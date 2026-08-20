@@ -101,13 +101,14 @@ On approval:
 
 1. Change the first line of `.talpi/plan.md` from `status: draft` to
    `status: approved`.
-2. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
-   building`, `current_phase: 1`, `phases_total: <n>` (n = the number of
-   phases in the approved plan), `updated: <ISO date>`.
-3. Append an event to `.talpi/journal.md` recording that the plan was
-   approved and how many phases it has (`- [<ISO date>] plan approved,
-   <n> phases` — journal lines are always `- [<ISO date>] <event>`,
-   append-only).
+2. Rewrite `.talpi/state.md` through the state script —
+   `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" building 1 <n>`
+   (n = the number of phases in the approved plan) — which validates
+   the vocabulary, writes all four keys, and stamps `updated`.
+3. Journal the approval through the journal script —
+   `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-journal.sh" "plan approved,
+   <n> phases"` — which stamps the canonical `- [<ISO date>] <event>`
+   form and enforces append-only. Never hand-format a journal line.
 4. Tell the human the run is now autonomous: there are no more
    mandatory approval gates until a phase report arrives, or the run
    halts on an escalation. Hand off to the talpirun skill.

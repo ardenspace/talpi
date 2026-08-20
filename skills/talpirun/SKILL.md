@@ -66,7 +66,12 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    phase's contracts (the `B<n>` shapes from spec.md that the phase's
    `Contracts:` line names), and its own step description from
    plan.md, and nothing else — all three inlined in the dispatch
-   prompt, not passed as paths for the subagent to go read. Inlining
+   prompt, not passed as paths for the subagent to go read. Build
+   every dispatch from `references/implementer-prompt.md`: it carries
+   those three slots plus the standing rules each implementer must
+   receive — the question rule and the contract-dispute license below
+   travel in the template, never from the orchestrator's memory, so no
+   implementer is dispatched without them. Inlining
    is safe because the orchestrator is conventions.md's only writer
    during a run and the contracts froze at spec approval, so the
    inlined copies cannot be stale — and it spares each subagent the
@@ -124,7 +129,11 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    contract itself looks wrong — it contradicts the spec's intent,
    another contract, or what implementing revealed — the implementer
    says so and stops; it never contorts internals until the test
-   passes. "The implementation violates the contract" is the
+   passes. The canonical report form lives in
+   `references/implementer-prompt.md` (`CONTRACT DISPUTE: <contract
+   id> — <one sentence>`), so every implementer knows the license and
+   the orchestrator can dispatch on the first line of the reply. "The
+   implementation violates the contract" is the
    implementer's to fix; "the contract is wrong" is only ever the
    human's. The orchestrator journals `phase <n> contract dispute:
    <summary>` and halts through the blocking-escalation path under
@@ -149,7 +158,14 @@ through that `## Phase <n>: <name>` section of `.talpi/plan.md`:
    the plan.md tick, any conventions.md update it triggered, and any
    journal line the step produced (`started`, `contracts pinned`, `no
    mechanical check`) — as a single commit: `talpi: phase <n> step
-   <k>: <short description>`. If a crash leaves these out of step,
+   <k>: <short description>`. That message form is talpi's default,
+   not load-bearing: if the repo enforces its own commit-message
+   convention, record that convention in conventions.md when the run's
+   first dispatch is prepared (next to the environment facts) and
+   follow it instead. What never bends is the atomicity — the step's
+   code and its plan.md tick land in the same commit, because that
+   commit, not its message, is the step's ground truth.
+   If a crash leaves these out of step,
    recovery is mechanical: a step whose commit landed is done whatever
    the journal says (commits are ground truth for steps; the journal
    for phase events; state.md is a snapshot rewritten from the
@@ -169,7 +185,11 @@ Dispatch exactly one fresh-context verifier — no conversation history —
 using `references/verifier-prompt.md`, filling in the phase number, the
 project name, and the diff range covering this phase's work:
 `<base>..HEAD`, where `<base>` is the hash recorded in the phase's
-`phase <n> started (base: <hash>)` journal line.
+`phase <n> started (base: <hash>)` journal line. The diff excludes
+`.talpi/` bookkeeping — plan.md ticks and journal lines are commit
+freight, not review material — so the range is read as
+`git diff <base>..HEAD -- . ':(exclude).talpi'`; the verifier still
+reads the `.talpi/` files themselves as context.
 
 **Lane isolation.** If `.talpi/knowledge.md` exists (a previous run
 distilled it), it never enters a verifier or run-reviewer dispatch —
@@ -273,6 +293,18 @@ verification is clean or resolved:
    the break as a step, dispatch a fresh implementer subagent to fix
    it, and re-run the smoke scenario before attempting completion
    again.
+   One reuse license exists, and it is mechanical — the diff decides,
+   never the session's judgment. When a final-phase step's acceptance
+   already included launching the product for real and walking the
+   full smoke scenario, journal `smoke walked (at: <hash>)` at that
+   moment, `<hash>` being HEAD when the walk finished — the line is
+   written when it happens, never retroactively. At completion, that
+   walk may stand in for step 1 iff
+   `git diff --name-only <hash>..HEAD -- . ':(exclude).talpi'` prints
+   only documentation paths (every path matches `*.md`). Then journal
+   `smoke reused from phase <n> (doc-only diff since <hash>)` and move
+   on. Anything else — one non-doc path, no `smoke walked` line from
+   the final phase, a diff command that errors — means walk it fresh.
 2. Run the **run review** — dispatch exactly one fresh-context
    reviewer, no conversation history, using
    `references/run-reviewer-prompt.md`. Phase verifiers each saw only
@@ -284,7 +316,9 @@ verification is clean or resolved:
    (reopened by rejection or a review fix), narrow it to
    `<last reviewed hash>..HEAD` from the most recent
    `run review (through <hash>)` journal line — earlier commits were
-   already reviewed. Findings route by tag:
+   already reviewed. The same `:(exclude).talpi` pathspec applies as
+   in phase-end verification — bookkeeping churn is not review
+   material. Findings route by tag:
    - `[FIX]` (objective bug or spec violation): same machinery as a
      smoke-run break — one fresh implementer subagent per finding,
      re-run the test suite, commit as
@@ -333,7 +367,14 @@ verification is clean or resolved:
    Drop every entry either command reports as failing, or demote it to
    an Open question, and re-run until both are clean. Trust comes from
    the gate, not the distillation — the same architecture as
-   implementers plus contract tests.
+   implementers plus contract tests. Know what each check means, by
+   design: Decision quotes resolve content-addressed — the text must
+   appear verbatim in spec.md, an archived spec, or journal.md, so an
+   entry surviving a later run's archive move is intended, not a gap
+   (the `source:` field is a hint the check never trusts). Open
+   questions get only the question-form check because nothing
+   downstream ever trusts them; executable trust comes from `replay`
+   alone.
 3. Journal `knowledge distilled`.
 4. Rewrite `.talpi/state.md` in full, all four keys: `run_status:
    done`, `current_phase` and `phases_total` unchanged, `updated: <ISO

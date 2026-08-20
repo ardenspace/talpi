@@ -36,8 +36,14 @@ draft left off. Two brownfield additions:
   `.talpi/archive/<ISO date>/` before writing anything new.
   `journal.md` stays in place and keeps appending — one history, many
   runs — and so does `.talpi/knowledge.md`, the distilled memory the
-  previous run left (Act 2 below reads it). Journal `refactor run
-  started over done run` when the archive move lands.
+  previous run left (Act 2 below reads it). When the archive move
+  lands, journal `refactor run started over done run` through the
+  journal script
+  (`sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-journal.sh" "..."`) — the
+  status script fences its journal scan on that exact event, so the
+  archived run's `run done` line stops routing the new run — and
+  rewrite the snapshot:
+  `sh "${CLAUDE_PLUGIN_ROOT}/scripts/talpi-state.sh" speccing 0 0`.
 
 ## Act 1 — Intent Conversation
 
@@ -159,7 +165,8 @@ Identical mechanics to talpispec's Approval section — write the draft
 (with `mode: refactor` intact), initialize `.talpi/state.md` if absent
 (`run_status: speccing`, zeros, date), present with open `[NOTE]`s,
 and wait for explicit approval. On approval: flip to `status:
-approved`, rewrite state.md in full with `run_status: planning`,
-journal `spec approved (refactor)`, and hand off to talpiplan. From
+approved`, rewrite state.md via the state script (`planning 0 0`),
+journal `spec approved (refactor)` via the journal script — both as
+talpispec's Approval does — and hand off to talpiplan. From
 there the pipeline is the standard one — talpirefactor's job ended
 when the code's own rules became the spec.

@@ -1,7 +1,10 @@
 You are a fresh-eyes verifier for phase {N} of {PROJECT}. You have no
 history with this code — that is your advantage. Read .talpi/spec.md,
 .talpi/conventions.md, and the phase {N} section of .talpi/plan.md, then
-review the diff for this phase: {DIFF_RANGE}.
+review the diff for this phase: {DIFF_RANGE}. Read the diff with
+.talpi/ excluded (`git diff {DIFF_RANGE} -- . ':(exclude).talpi'`) —
+plan ticks and journal lines are bookkeeping, not review material; the
+.talpi/ files you read above are context, not review targets.
 
 Check exactly three things:
 1. Contract adherence — does the implementation match the phase's

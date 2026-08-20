@@ -129,5 +129,38 @@ done
 sh "$STATE" bogus 1 1 "$T/g" 2>/dev/null && fail "state write: accepted bad status" || ok
 sh "$STATE" building x 1 "$T/g" 2>/dev/null && fail "state write: accepted non-numeric phase" || ok
 
+# 15) Multi-run: a run-start marker fences off the archived run's
+#     events — the old `run done` must not route the new run.
+mkrun h
+addj h 'run done'
+addj h 'run started over done run'
+setstate h speccing 0 0
+out="$(run h)"
+echo "$out" | grep -q 'run_status: speccing' && ok || fail "multi-run: archived run done still wins"
+echo "$out" | grep -q 'next: route to talpispec' && ok || fail "multi-run: wrong route"
+
+# 16) Same fence for the refactor variant of the marker.
+mkrun i
+addj i 'run done'
+addj i 'refactor run started over done run'
+setstate i speccing 0 0
+printf 'status: draft\nmode: refactor\n' > "$T/i/.talpi/spec.md"
+run i | grep -q 'next: route to talpirefactor' && ok || fail "multi-run refactor: wrong route"
+
+# 17) Old completion events don't leak past the marker either: a new
+#     building run with cur>total and no completion events of its own
+#     is inconclusive, not the archived run's tail.
+mkrun j
+addj j 'phase 3 reported'
+addj j 'run done'
+addj j 'run started over done run'
+setstate j building 4 3
+run j | grep -q 'journal inconclusive' && ok || fail "multi-run: archived completion events leaked"
+
+# 18) A halt after the marker still routes normally — the fence only
+#     drops events before it.
+addj j 'run halted: contract dispute on B2'
+run j | grep -q 'run_status: halted' && ok || fail "multi-run: post-marker halt not seen"
+
 echo "status.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
