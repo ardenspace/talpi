@@ -228,6 +228,23 @@ to the next phase, `updated` timestamp refreshed), and continue
 immediately to the next phase's loop — never wait for a reply. A human
 reply, if one comes, steers the next phase; silence is not a blocker.
 
+**Delivering the report must not end the turn.** "Continue immediately"
+governs the session's turn, not merely its intent, and the channel
+decides whether that is automatic. Where the channel is a tool — a chat
+integration, a notifier — sending the report is a tool call, and work
+continues after it on its own. Where the channel is the session's own
+transcript, the report *is* the session's user-facing text, and final
+text is how a session ends its turn: written last, it hands control back
+to the human and the run stalls there until they type something. That
+stall is invisible to the session, which believes it reported and
+continued. So the report text is never the turn's final act: emit it,
+then keep going in the same turn — the journal line, the state rewrite,
+and the next phase's first dispatch all follow it without pausing. The
+only turns talpirun may end are the stops this skill names: a blocking
+escalation's halt, and the final report awaiting acceptance. A phase
+boundary is not one of them, and neither is a channel that happens to
+make stopping the path of least resistance.
+
 **Exception — blocking escalation.** If a finding from phase-end
 verification alters an entry on the Reversibility Ledger's *Decided*
 list, this phase does not get a normal, continue-on report. Instead:
@@ -343,7 +360,11 @@ verification is clean or resolved:
    `.talpi/state.md`'s `run_status` at `building` — the run is not
    `done` yet — and rewrite `.talpi/handoff.md` so a fresh session
    landing here knows the build is finished and is waiting on the
-   human's acceptance, not mid-phase work.
+   human's acceptance, not mid-phase work. This bookkeeping lands in
+   the same turn as step 3's report — the turn-ending rule under Phase
+   report holds here too, and only step 5's wait may end the turn. A
+   final report that ends the turn before this runs leaves the journal
+   and handoff.md describing a run still mid-phase.
 5. Wait for the human's response, same as any other stop-report: the
    run does not send further reports on its own from here.
 

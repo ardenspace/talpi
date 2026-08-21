@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.6.1 — 2026-08-21
+Prose-only fix for a stall that only ever showed on one channel: with a
+chat integration attached, phase reports go out as a tool call and the
+run continues by itself; in a plain terminal the report *is* the
+session's final text, so the turn ended at every phase boundary and the
+build sat there until the human typed "continue". The
+plan-approved-then-autonomous promise was, in effect, conditional on
+having a notifier configured.
+- **A phase report may not end the turn** (talpirun, Phase report):
+  "continue immediately" is now stated as a rule about the session's
+  turn, not just its intent — emit the report, then journal, rewrite
+  state, and dispatch the next phase's first step in the same turn.
+  The only turns talpirun may end are the stops the skill names: a
+  blocking escalation's halt, and the final report awaiting
+  acceptance.
+- **Completion bookkeeping shares the report's turn** (talpirun,
+  Completion step 4): the same trap cost real state on the terminal
+  channel — a final report that ended the turn left `final report
+  sent, awaiting acceptance` unjournaled and handoff.md still
+  describing mid-phase work.
+
 ## 0.6.0 — 2026-08-21
 From the second nanpaseom dogfood retrospective — multi-run routing
 becomes real, and the last hand-formatted state writes disappear.
